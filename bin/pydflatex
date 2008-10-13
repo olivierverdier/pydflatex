@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+# (c) Olivier Verdier <olivier.verdier@gmail.com>, 2007-2008
+"""
+A wrapper around pdflatex to allow:
+- hiding of the temporary files in various ways
+- running pdflatex blazingly fast using the -batchmode option
+	and returning feedback by parsing the log file.
+"""
+
+# name of the directory containing the auxiliary files
+tmp_dir_name = '.latex_tmp'
+
+# whether to stop as soon as an error is detected
+halt_on_error = True
+
+
+######################################################################
+
+
+#setting up the command options
+from optparse import OptionParser
+usage = 'usage: %prog [options] texfile1 [texfile2]...'
+description = '''Compile tex files with pdflatex and store the auxiliary files in a subfolder.
+Note that the '.tex' extension may be omitted'''
+parser = OptionParser(usage=usage, description=description)
+parser.add_option('-v', '--view', dest='open', help='view the pdf file(s) in an editor.', default=False, action='store_true')
+parser.add_option('-c', '--continue', help='continue on error', dest='halt', action='store_false', default=halt_on_error)
+parser.add_option('-f', '--folder', help='hidden folder for auxiliary files', dest='tmp_dir_name', action='store', default=tmp_dir_name)
+(options,args) = parser.parse_args()
+
+# setting the halt on error argument of pdflatex
+if options.halt:
+	options.halt = "-halt-on-error"
+else:
+	options.halt = ""
+
+from pydflatex.typesetter import Typesetter
+
+Typesetter(options,args)
+
