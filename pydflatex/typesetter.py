@@ -94,6 +94,14 @@ class Typesetter(object):
 				# we move the pdf in the current directory
 				if aux_ext == 'pdf':
 					dest = os.curdir
+					if self.options.name:
+						name = self.options.name + os.path.extsep + aux_ext
+					else:
+						name = aux_name
+					dest = os.path.join(dest,name) 
+					
+					if os.uname()[0] == 'Darwin' and self.options.open:
+						os.system('/usr/bin/open %s' % dest)
 				else:
 					dest = os.path.join(base,os.curdir)
 				shutil.move(os.path.join(self.tmp_dir, aux_name), dest)
@@ -102,9 +110,6 @@ class Typesetter(object):
 					if os.uname()[0] == 'Darwin':
 						if os.system('/Developer/Tools/SetFile -a V %s' % final_path):
 							eprint("Install the Developer Tools if you want the auxiliary files to get invisible", 'W')
-				else: # pdf file
-					if os.uname()[0] == 'Darwin' and self.options.open:
-						os.system('/usr/bin/open %s' % final_path)
 
 			except IOError:
 				if aux_ext == 'pdf':
@@ -113,6 +118,9 @@ class Typesetter(object):
 
 
 	def typeset_file(self, tex_path):
+		"""
+		Typeset one given file.
+		"""
 		time_start = time.time()
 		# find out the directory where the file is
 		base,file_name = os.path.split(tex_path)
@@ -130,7 +138,7 @@ class Typesetter(object):
 		else:
 			full_path = tex_path + os.path.extsep + 'tex'
 		
-		# check that the file exists
+		# make sure that the file exists
 		if not os.path.exists(full_path):
 			eprint('File %s not found' % (file_base + os.path.extsep + 'tex'), 'E')
 			return
