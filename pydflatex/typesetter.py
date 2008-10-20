@@ -101,7 +101,7 @@ class Typesetter(object):
 					dest = os.path.join(dest,name) 
 					
 					if os.uname()[0] == 'Darwin' and self.options.open:
-						os.system('/usr/bin/open %s' % dest)
+						os.system('/usr/bin/open "%s"' % dest)
 				else:
 					dest = os.path.join(base,os.curdir)
 				shutil.move(os.path.join(self.tmp_dir, aux_name), dest)
