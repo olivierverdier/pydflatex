@@ -95,13 +95,13 @@ class Typesetter(object):
 				if aux_ext == 'pdf':
 					dest = os.curdir
 					if self.options.name:
-						name = self.options.name + os.path.extsep + aux_ext
+						dest = os.path.join(dest,self.options.name + os.path.extsep + aux_ext)
+						name = dest
 					else:
 						name = aux_name
-					dest = os.path.join(dest,name) 
 					
 					if os.uname()[0] == 'Darwin' and self.options.open:
-						os.system('/usr/bin/open "%s"' % dest)
+						os.system('/usr/bin/open "%s"' % name)
 				else:
 					dest = os.path.join(base,os.curdir)
 				shutil.move(os.path.join(self.tmp_dir, aux_name), dest)
