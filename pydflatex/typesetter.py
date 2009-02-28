@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# (c) Olivier Verdier <olivier.verdier@gmail.com>, 2007-2008
+# (c) Olivier Verdier <olivier.verdier@gmail.com>, 2007-2009
 """
 A wrapper around pdflatex to allow:
 - hiding of the temporary files in various ways
@@ -20,17 +20,21 @@ def eprint(msg='', flag='no'):
 	print >> sys.stderr, "\x1B[00;00m"
 
 class Typesetter(object):
-	def __init__(self,options, args):
-		self.options = options
-		self.args = args
+	def __init__(self, **options):
+		# storing the options
+		for k, v in options.items():
+			self.__setattr__(k,v)
 		# loading the log parser
 		from pydflatex.latexlogparser import LogCheck
 		self.parser = LogCheck()
 		self.tmp_dir = self.create_tmp(os.path.curdir)
-		self.run()
 
 	# maximum number of pdflatex runs
 	max_run = 5
+	
+	tmp_dir_name = '.latex_tmp'
+	
+	halt_on_errors = True
 
 
 	# extensions of the files that will be "pulled back" to the directory where the file is
@@ -44,7 +48,7 @@ class Typesetter(object):
 		Create the temporary directory if it doesn't exist
 		return the tmp_dir
 		"""
-		tmp_dir = os.path.join(base, self.options.tmp_dir_name)
+		tmp_dir = os.path.join(base, self.tmp_dir_name)
 		if not os.path.isdir(tmp_dir):
 			try:
 				os.mkdir(tmp_dir)
@@ -52,13 +56,14 @@ class Typesetter(object):
 				raise IOError('A file named "%s" already exists in this catalog' % tmp_dir)
 		return tmp_dir
 	
-	def run(self):
-
-		# support for compiling several files at once
-		for tex_path in self.args:
+	def run(self, file_paths):
+		"""
+		Compile several files at once
+		"""
+		for tex_path in file_paths:
 			self.typeset_file(tex_path)
 	
-	def interpret_log(self, log_file):
+	def parse_log(self, log_file):
 		"""
 		Read the log file and print out the gist of it.
 		"""
@@ -94,13 +99,14 @@ class Typesetter(object):
 				# we move the pdf in the current directory
 				if aux_ext == 'pdf':
 					dest = os.curdir
-					if self.options.name:
-						dest = os.path.join(dest,self.options.name + os.path.extsep + aux_ext)
-						name = dest
-					else:
-						name = aux_name
+## 					if self.options.name:
+## 						dest = os.path.join(dest,self.options.name + os.path.extsep + aux_ext)
+## 						name = dest
+## 					else:
+					name = aux_name
 					
-					if os.uname()[0] == 'Darwin' and self.options.open:
+					if os.uname()[0] == 'Darwin' and self.open:
+						eprint('Opening "%s"...' % name)
 						os.system('/usr/bin/open "%s"' % name)
 				else:
 					dest = os.path.join(base,os.curdir)
@@ -152,9 +158,9 @@ class Typesetter(object):
 		for run_nb in range(self.max_run):
 			# run pdflatex
 			eprint("\n\tpdflatex run number %d\n" % (run_nb + 1))
-			os.popen('pdflatex --shell-escape -no-mktex=pk %s	 -interaction=batchmode --output-directory=%s %s' % (self.options.halt, self.tmp_dir, root))
+			os.popen('pdflatex --shell-escape -no-mktex=pk %s	 -interaction=batchmode --output-directory=%s %s' % (["", "-halt-on-error"][self.halt_on_errors], self.tmp_dir, root))
 			try:
-				self.interpret_log(log_file)
+				self.parse_log(log_file)
 			except KeyboardInterrupt:
 				eprint ("Keyboard Interruption", 'E')
 				sys.exit()
