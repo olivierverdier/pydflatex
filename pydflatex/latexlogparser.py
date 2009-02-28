@@ -304,13 +304,13 @@ class LogCheck (object):
 			page = self.update_page(line, page)
 
 	def get_errors (self):
-		return self.parse(errors=1)
+		return self.parse(errors=True)
 	def get_boxes (self):
-		return self.parse(boxes=1)
+		return self.parse(boxes=True)
 	def get_references (self):
-		return self.parse(refs=1)
+		return self.parse(refs=True)
 	def get_warnings (self):
-		return self.parse(warnings=1)
+		return self.parse(warnings=True)
 
 	def update_file (self, line, stack, last):
 		"""
