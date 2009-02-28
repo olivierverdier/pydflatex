@@ -35,6 +35,8 @@ class Typesetter(object):
 	tmp_dir_name = '.latex_tmp'
 	
 	halt_on_errors = True
+	
+	open = False
 
 
 	# extensions of the files that will be "pulled back" to the directory where the file is
@@ -105,17 +107,17 @@ class Typesetter(object):
 ## 					else:
 					name = aux_name
 					
-					if os.uname()[0] == 'Darwin' and self.open:
-						eprint('Opening "%s"...' % name)
-						os.system('/usr/bin/open "%s"' % name)
 				else:
 					dest = os.path.join(base,os.curdir)
 				shutil.move(os.path.join(self.tmp_dir, aux_name), dest)
 				final_path = os.path.join(dest, aux_name)
-				if aux_ext != 'pdf': # we hide all moved files except the pdf
-					if os.uname()[0] == 'Darwin':
+				if os.uname()[0] == 'Darwin': # on Mac OS X we hide all moved files...
+					if aux_ext != 'pdf': # ...except the pdf
 						if os.system('/Developer/Tools/SetFile -a V %s' % final_path):
 							eprint("Install the Developer Tools if you want the auxiliary files to get invisible", 'W')
+					elif self.open:
+						eprint('Opening "%s"...' % name)
+						os.system('/usr/bin/open "%s"' % name)						
 
 			except IOError:
 				if aux_ext == 'pdf':
