@@ -7,7 +7,7 @@ A wrapper around pdflatex to allow:
 	and returning feedback by parsing the log file.
 """
 
-from pydflatex.typesetter import Typesetter
+from pydflatex import Typesetter
 
 # name of the directory containing the auxiliary files
 tmp_dir_name = Typesetter.tmp_dir_name
