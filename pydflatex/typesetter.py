@@ -176,4 +176,4 @@ class Typesetter(object):
 					break
 
 		time_end = time.time()
-		eprint("Typesetting of '%s' completed in %ds." % (file_base,int(time_end - time_start)), 'G')
+		eprint('Typesetting of "%s" completed in %ds.' % (full_path, int(time_end - time_start)), 'G')
