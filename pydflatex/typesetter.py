@@ -135,25 +135,25 @@ class Typesetter(object):
 		os.environ['TEXINPUTS'] = base + ':'
 		# find out the name of the file to compile
 		root, file_ext = os.path.splitext(tex_path)
-		if file_ext:
+		if file_ext[1:]:
 			if file_ext[1:] != 'tex':
 				eprint("Wrong extension for %s" % tex_path, 'E')
 				return
 			else:
 				full_path = tex_path
 		else:
-			full_path = tex_path + os.path.extsep + 'tex'
+			full_path = root + os.path.extsep + 'tex'
 		
 		# make sure that the file exists
 		if not os.path.exists(full_path):
-			eprint('File %s not found' % (file_base + os.path.extsep + 'tex'), 'E')
+			eprint('File %s not found' % full_path, 'E')
 			return
 
 
 		# log file
 		log_file = os.path.join(self.tmp_dir, file_base + os.path.extsep + 'log')
 
-		eprint('Typesetting %s\n' % tex_path)
+		eprint('Typesetting %s\n' % full_path)
 		
 		for run_nb in range(self.max_run):
 			# run pdflatex
