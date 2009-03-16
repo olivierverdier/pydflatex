@@ -27,7 +27,7 @@ class Typesetter(object):
 		# loading the log parser
 		from pydflatex.latexlogparser import LogCheck
 		self.parser = LogCheck()
-		self.tmp_dir = self.create_tmp(os.path.curdir)
+		self.tmp_dir = self.create_tmp_dir(os.path.curdir)
 
 	# maximum number of pdflatex runs
 	max_run = 5
@@ -37,15 +37,18 @@ class Typesetter(object):
 	halt_on_errors = True
 	
 	open = False
-
+	
+	# whereas the pdf file produced will be pulled back in the current directory
+	move_pdf_to_curdir = True
+	
+	new_pdf_name = ''
 
 	# extensions of the files that will be "pulled back" to the directory where the file is
 	# on Mac OS X those files will be set invisible
-	# the pdf file produced will always be pulled back in the current directory
 	move_exts = ['pdfsync','pdf']
 
 	
-	def create_tmp(self, base):
+	def create_tmp_dir(self, base):
 		"""
 		Create the temporary directory if it doesn't exist
 		return the tmp_dir
@@ -62,6 +65,9 @@ class Typesetter(object):
 		"""
 		Compile several files at once
 		"""
+		# easier to write with one file
+		if not isinstance(file_paths, (list, tuple)):
+			file_paths = [file_paths]
 		for tex_path in file_paths:
 			self.typeset_file(tex_path)
 	
@@ -98,17 +104,17 @@ class Typesetter(object):
 		for aux_ext in self.move_exts:
 			aux_name = file_base + os.path.extsep + aux_ext
 			try:
+				dest = os.path.join(base,os.curdir)
 				# we move the pdf in the current directory
 				if aux_ext == 'pdf':
-					dest = os.curdir
-## 					if self.options.name:
-## 						dest = os.path.join(dest,self.options.name + os.path.extsep + aux_ext)
-## 						name = dest
-## 					else:
-					name = aux_name
-					
-				else:
-					dest = os.path.join(base,os.curdir)
+					pdf_name = os.path.join(base, aux_name)
+					if self.move_pdf_to_curdir:
+						dest = os.curdir
+						pdf_name = aux_name
+					if self.new_pdf_name:
+						dest = os.path.join(dest,self.new_pdf_name + os.path.extsep + 'pdf')
+						pdf_name = dest
+				
 				shutil.move(os.path.join(self.tmp_dir, aux_name), dest)
 				final_path = os.path.join(dest, aux_name)
 				if os.uname()[0] == 'Darwin': # on Mac OS X we hide all moved files...
@@ -116,8 +122,8 @@ class Typesetter(object):
 						if os.system('/Developer/Tools/SetFile -a V %s' % final_path):
 							eprint("Install the Developer Tools if you want the auxiliary files to get invisible", 'W')
 					elif self.open:
-						eprint('Opening "%s"...' % name)
-						os.system('/usr/bin/open "%s"' % name)						
+						eprint('Opening "%s"...' % pdf_name)
+						os.system('/usr/bin/open "%s"' % pdf_name)						
 
 			except IOError:
 				if aux_ext == 'pdf':
