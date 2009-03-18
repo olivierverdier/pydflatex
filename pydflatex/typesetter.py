@@ -12,12 +12,14 @@ import sys
 import shutil
 import time
 
-# error print
+stream = sys.stdout
+
+# message print
 flags = {'E': "\x1B[01;31m", 'no':'', 'G': "\x1B[01;32m", 'W': "\x1B[01;33m", 'B': "\x1B[00;36m", 'R': "\x1B[01;35m", 'M': "\x1B[03;00m"}
 def eprint(msg='', flag='no'):
-	print >> sys.stderr, flags[flag],
-	print >> sys.stderr, msg,
-	print >> sys.stderr, "\x1B[00;00m"
+	print >> stream, flags[flag],
+	print >> stream, msg,
+	print >> stream, "\x1B[00;00m"
 
 class Typesetter(object):
 	def __init__(self, **options):
