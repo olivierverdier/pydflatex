@@ -40,6 +40,8 @@ class Typesetter(object):
 	
 	open = False
 	
+	clean_up = False
+	
 	# whereas the pdf file produced will be pulled back in the current directory
 	move_pdf_to_curdir = True
 	
@@ -187,3 +189,5 @@ class Typesetter(object):
 
 		time_end = time.time()
 		eprint('Typesetting of "%s" completed in %ds.' % (full_path, int(time_end - time_start)), 'G')
+		if self.clean_up:
+			shutil.rmtree(self.tmp_dir)
