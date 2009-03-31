@@ -42,6 +42,8 @@ class Typesetter(object):
 	
 	clean_up = False
 	
+	extra_run = False
+	
 	# whereas the pdf file produced will be pulled back in the current directory
 	move_pdf_to_curdir = True
 	
@@ -167,6 +169,10 @@ class Typesetter(object):
 
 		eprint('Typesetting %s\n' % full_path)
 		
+		# preparing the extra run slot
+		if self.extra_run:
+			self.extra_run_slot = True
+		
 		for run_nb in range(self.max_run):
 			# run pdflatex
 			eprint("\n\tpdflatex run number %d\n" % (run_nb + 1))
@@ -185,7 +191,10 @@ class Typesetter(object):
 				self.move_auxiliary(base,file_base)
 				# we stop on errors or if no other run is needed
 				if not self.parser.run_needed() or self.parser.errors():
-					break
+					if self.extra_run_slot: # run once more
+						self.extra_run_slot = False
+					else:
+						break
 
 		time_end = time.time()
 		eprint('Typesetting of "%s" completed in %ds.' % (full_path, int(time_end - time_start)), 'G')

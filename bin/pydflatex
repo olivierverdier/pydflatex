@@ -34,7 +34,9 @@ parser.add_option('-t', '--tmp-folder', help='hidden folder for auxiliary files'
 
 #parser.add_option('-r', '--rename', help='rename the output pdf file', dest='name', action='store', default=None)
 
-parser.add_option('-c', '--clean-up', help='clean up auxiliary files', dest='clean_up', action='store_true', default= False)
+parser.add_option('-c', '--clean-up', help='clean up auxiliary files', dest='clean_up', action='store_true', default=False)
+
+parser.add_option('-x', '--extra-run', help='run pdflatex one extra time', dest='extra_run', action='store_true', default=False)
 
 
 (options,args) = parser.parse_args()
