@@ -26,9 +26,12 @@ description = '''Compile tex files with pdflatex and store the auxiliary files i
 Note that the '.tex' extension may be omitted'''
 parser = OptionParser(usage=usage, description=description)
 
+## def add_option(*args, **kwargs):
+## 	parser.add_option(*args,**kwargs, default=Typesetter.__getattribute__(kwargs['dest']))
+
 parser.add_option('-v', '--view', dest='open', help='view the pdf file(s) in an editor.', default=False, action='store_true')
 
-parser.add_option('-f', '--force', help='force continuing on error', dest='halt_on_errors', action='store_false', default=halt_on_error)
+parser.add_option('-k', '--continue', help='continue on error', dest='halt_on_errors', action='store_false', default=halt_on_error)
 
 parser.add_option('-t', '--tmp-folder', help='hidden folder for auxiliary files', dest='tmp_dir_name', action='store', default=tmp_dir_name)
 
