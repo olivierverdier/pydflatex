@@ -170,8 +170,7 @@ class Typesetter(object):
 		eprint('Typesetting %s\n' % full_path)
 		
 		# preparing the extra run slot
-		if self.extra_run:
-			self.extra_run_slot = True
+		self.extra_run_slot = self.extra_run
 		
 		for run_nb in range(self.max_run):
 			# run pdflatex
