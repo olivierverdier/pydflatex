@@ -133,8 +133,9 @@ class Typesetter(object):
 
 			except IOError:
 				if aux_ext == 'pdf':
-					eprint('\n\tPdf file "%s" not found.' % aux_name, 'E')
-					sys.exit(1)
+					message = 'pdf file "%s" not found.' % aux_name
+					eprint('\n\t%s' % message, 'E')
+					raise IOError(message)
 
 
 	def typeset_file(self, tex_path):

@@ -47,5 +47,9 @@ parser.add_option('-x', '--extra-run', help='run pdflatex one extra time', dest=
 
 
 typesetter = Typesetter(**options.__dict__)
-typesetter.run(args)
+try:
+	typesetter.run(args)
+except Exception, e:
+	import sys
+	sys.exit(1)
 
