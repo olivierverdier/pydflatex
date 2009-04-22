@@ -9,12 +9,6 @@ A wrapper around pdflatex to allow:
 
 from pydflatex import Typesetter
 
-# name of the directory containing the auxiliary files
-tmp_dir_name = Typesetter.tmp_dir_name
-
-# whether to stop as soon as an error is detected
-halt_on_error = Typesetter.halt_on_errors
-
 
 ######################################################################
 
@@ -26,22 +20,23 @@ description = '''Compile tex files with pdflatex and store the auxiliary files i
 Note that the '.tex' extension may be omitted'''
 parser = OptionParser(usage=usage, description=description)
 
-## def add_option(*args, **kwargs):
-## 	parser.add_option(*args,**kwargs, default=Typesetter.__getattribute__(kwargs['dest']))
+def add_option(parser, *args, **kwargs):
+	kwargs['default'] = getattr(Typesetter, kwargs['dest'])
+	parser.add_option(*args, **kwargs)
 
-parser.add_option('-v', '--view', dest='open', help='view the pdf file(s) in an editor.', default=False, action='store_true')
+add_option(parser, '-v', '--view', dest='open', help='view the pdf file(s) in an editor.', action='store_true')
 
-parser.add_option('-k', '--continue', help='continue on error', dest='halt_on_errors', action='store_false', default=halt_on_error)
+add_option(parser, '-k', '--continue', help='continue on error', dest='halt_on_errors', action='store_false')
 
-parser.add_option('-t', '--tmp-folder', help='hidden folder for auxiliary files', dest='tmp_dir_name', action='store', default=tmp_dir_name)
+add_option(parser, '-t', '--tmp-folder', help='hidden folder for auxiliary files', dest='tmp_dir_name', action='store')
 
 #parser.add_option('-r', '--rename', help='rename the output pdf file', dest='name', action='store', default=None)
 
-parser.add_option('-c', '--clean-up', help='clean up auxiliary files', dest='clean_up', action='store_true', default=False)
+add_option(parser, '-c', '--clean-up', help='clean up auxiliary files', dest='clean_up', action='store_true')
 
-parser.add_option('-x', '--extra-run', help='run pdflatex one extra time', dest='extra_run', action='store_true', default=False)
+add_option(parser, '-x', '--extra-run', help='run pdflatex one extra time', dest='extra_run', action='store_true')
 
-parser.add_option('-w', '--warning', help='remove over/underfull warnings', dest='suppress_warning', action='store_true', default=False)
+add_option(parser, '-w', '--warning', help='remove over/underfull warnings', dest='suppress_warning', action='store_true')
 
 (options,args) = parser.parse_args()
 
