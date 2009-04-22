@@ -48,6 +48,8 @@ class Typesetter(object):
 	move_pdf_to_curdir = True
 	
 	new_pdf_name = ''
+	
+	suppress_warning = False
 
 	# extensions of the files that will be "pulled back" to the directory where the file is
 	# on Mac OS X those files will be set invisible
