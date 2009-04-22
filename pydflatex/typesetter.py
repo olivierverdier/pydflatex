@@ -87,7 +87,8 @@ class Typesetter(object):
 			has_occ = box['text'].find(r' has occurred while \output is active')
 			if has_occ != -1:
 				box['text'] = box['text'][:has_occ]
-			eprint("%4s: %s" % (box.get('page', ''), box['text']), 'B')
+			if not self.suppress_warning:
+				eprint("%4s: %s" % (box.get('page', ''), box['text']), 'B')
 		for ref in parser.get_references():
 			eprint("%4s: %s" % (ref.get('line',''), ref['text']), 'R')
 		for warning in parser.get_warnings():
