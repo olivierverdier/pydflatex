@@ -141,10 +141,12 @@ class Typesetter(object):
 					raise IOError(message)
 
 
-	def typeset_file(self, tex_path):
+	def typeset_file(self, tex_path, extra_run=None):
 		"""
 		Typeset one given file.
 		"""
+		if extra_run is None:
+			extra_run = self.extra_run
 		time_start = time.time()
 		# find out the directory where the file is
 		base,file_name = os.path.split(tex_path)
@@ -174,7 +176,7 @@ class Typesetter(object):
 		eprint('Typesetting %s\n' % full_path)
 		
 		# preparing the extra run slot
-		self.extra_run_slot = self.extra_run
+		self.extra_run_slot = extra_run
 		
 		for run_nb in range(self.max_run):
 			# run pdflatex
@@ -194,8 +196,8 @@ class Typesetter(object):
 				self.move_auxiliary(base,file_base)
 				# we stop on errors or if no other run is needed
 				if not self.parser.run_needed() or self.parser.errors():
-					if self.extra_run_slot: # run once more
-						self.extra_run_slot = False
+					if self.extra_run_slot > 0: # run some more times
+						self.extra_run_slot -= 1
 					else:
 						break
 
