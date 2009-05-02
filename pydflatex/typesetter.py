@@ -123,6 +123,8 @@ class Typesetter(object):
 					if self.new_pdf_name:
 						dest = os.path.join(dest,self.new_pdf_name + os.path.extsep + 'pdf')
 						pdf_name = dest
+					# store the pdf name for later use
+					self.current_pdf_name = pdf_name
 				
 				shutil.move(os.path.join(self.tmp_dir, aux_name), dest)
 				final_path = os.path.join(dest, aux_name)
@@ -130,9 +132,6 @@ class Typesetter(object):
 					if aux_ext != 'pdf': # ...except the pdf
 						if os.system('/Developer/Tools/SetFile -a V %s' % final_path):
 							eprint("Install the Developer Tools if you want the auxiliary files to get invisible", 'W')
-					elif self.open:
-						eprint('Opening "%s"...' % pdf_name)
-						os.system('/usr/bin/open "%s"' % pdf_name)						
 
 			except IOError:
 				if aux_ext == 'pdf':
@@ -203,5 +202,8 @@ class Typesetter(object):
 
 		time_end = time.time()
 		eprint('Typesetting of "%s" completed in %ds.' % (full_path, int(time_end - time_start)), 'G')
+		if self.open:
+			eprint('Opening "%s"...' % self.current_pdf_name)
+			os.system('/usr/bin/open "%s"' % self.current_pdf_name)
 		if self.clean_up:
 			shutil.rmtree(self.tmp_dir)
