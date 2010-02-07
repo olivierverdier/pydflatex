@@ -69,10 +69,19 @@ class Typesetter(object):
 				raise IOError('A file named "%s" already exists in this catalog' % tmp_dir)
 		return tmp_dir
 	
+	def rm_tmp_dir(self):
+		"""
+		Remove the temporary dir. Useful for testing purposes.
+		"""
+		shutil.rmtree(self.tmp_dir)
+	
 	def run(self, file_paths):
 		"""
 		Compile several files at once
 		"""
+		# clean up first if needed
+		if self.clean_up:
+			self.rm_tmp_dir()
 		# easier to write with one file
 		if not isinstance(file_paths, (list, tuple)):
 			file_paths = [file_paths]
@@ -207,5 +216,3 @@ class Typesetter(object):
 		if self.open:
 			eprint('Opening "%s"...' % self.current_pdf_name)
 			os.system('/usr/bin/open "%s"' % self.current_pdf_name)
-		if self.clean_up:
-			shutil.rmtree(self.tmp_dir)
