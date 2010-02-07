@@ -74,22 +74,6 @@ class LaTeXLogger(logging.Logger):
 		"""
 		self.info(ansiformat('*black*', msg))
 	
-## class ColoredFormatter(logging.Formatter):
-## 	use_color = True
-## 	
-## 	colors = {'ERROR': '*red*'}
-## 	
-## 	def __init__(self, msg, use_color = True):
-## 		logging.Formatter.__init__(self, msg)
-## 		self.use_color = use_color
-## 
-## 	def format(self, record):
-## 		levelname = record.levelname
-## 		
-## 		if self.use_color and levelname in COLORS:
-## 			levelname_color = COLOR_SEQ % (30 + COLORS[levelname]) + levelname + RESET_SEQ
-## 			record.levelname = levelname_color
-## 		return logging.Formatter.format(self, record)
 
 
 logger = LaTeXLogger('pydflatex')
@@ -103,21 +87,6 @@ handler.setLevel(logging.INFO)
 
 logger.addHandler(handler)
 
-def eprint(msg='', flag=None):
-	logger.debug(msg)
-## # message print
-## stream = sys.stderr
-## flags = {'E': "\x1B[01;31m", 'no':'', 'G': "\x1B[01;32m", 'W': "\x1B[01;33m", 'B': "\x1B[00;36m", 'R': "\x1B[01;35m", 'M': "\x1B[03;00m"}
-## def eprint(msg='', flag='no'):
-##	print >> stream, flags[flag],
-##	print >> stream, msg,
-##	print >> stream, "\x1B[00;00m"
-
-
-
-flags = {None: '', 'E': '*red*', 'G': 'green', 'W': 'fuchsia', 'B': 'teal', 'R': 'purple'}
-## def eprint(msg='', flag=None):
-##	print ansiformat(flags[flag], msg)
 	
 class Typesetter(object):
 	def __init__(self, **options):
@@ -198,23 +167,14 @@ class Typesetter(object):
 			if has_occ != -1:
 				box['text'] = box['text'][:has_occ]
 			if not self.suppress_warning:
-##				eprint("%4s: %s" % (box.get('page', ''), box['text']), 'B')
 				logger.box(box.get('page'), box['text'])
 		for ref in parser.get_references():
-##			eprint(repr(ref), 'E')
 			logger.ref_warning(ref)
-##			eprint("%4s: %s" % (ref.get('line',''), ref['text']), 'R')
 		for warning in parser.get_warnings():
 			# following should be filtered via the loggers filter!
 			if warning.get('pkg') == 'hyperref' and warning['text'].find('Token') != -1:
 				continue # I hate those hyperref warning
-## 			package = warning.get('pkg')
-##			if package:
-##				package = ' [%s]' % package
-##			eprint(repr(warning), 'E')
-##			eprint("%4s:%s %s" % (warning.get('line',''), package, warning['text']), 'W')
 			logger.latex_warning(warning)
-## 		eprint()
 		for error in parser.get_errors():
 			logger.error("%s %4s: %s" % (error['file'], error.get('line',''), error['text']))
 			if error.get('code'): # if the code is available we print it:
