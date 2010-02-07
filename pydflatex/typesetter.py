@@ -28,7 +28,7 @@ class LaTeXLogger(logging.Logger):
 		logging.Logger.error(self, ansiformat('*red*', msg))
 	
 	def success(self, msg):
-		logging.info(ansiformat('*green*', msg))
+		self.info(ansiformat('*green*', msg))
 	
 	def ref_warning(self, ref):
 		self.warning("%4s: %s %s p.%s" % (ref.get('line',''), ansiformat('red', ref.get('ref','')), 'undefined', ref.get('page','')))
