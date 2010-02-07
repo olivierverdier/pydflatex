@@ -19,6 +19,7 @@ re_atline = re.compile(
 "( detected| in paragraph)? at lines? (?P<line>[0-9]*)(--(?P<last>[0-9]*))?")
 re_reference = re.compile("LaTeX Warning: Reference `(?P<ref>.*)' \
 on page (?P<page>[0-9]*) undefined on input line (?P<line>[0-9]*)\\.$")
+re_citation = re.compile("^.*Citation `(?P<cite>.*)' on page (?P<page>[0-9]*) undefined on input line (?P<line>[0-9]*)\\.$")
 re_label = re.compile("LaTeX Warning: (?P<text>Label .*)$")
 re_warning = re.compile(
 "(LaTeX|Package)( (?P<pkg>.*))? Warning: (?P<text>.*)$")
@@ -243,6 +244,18 @@ class LogCheck (object):
 					d =	{
 						"kind": "warning",
 						"text": _("Reference `%s' undefined.") % m.group("ref"),
+						"file": pos[-1]
+						}
+					d.update( m.groupdict() )
+					yield d
+				continue
+
+			m = re_citation.match(line)
+			if m:
+				if refs:
+					d =	{
+						"kind": "warning",
+						"text": _("Citation `%s' undefined.") % m.group("cite"),
 						"file": pos[-1]
 						}
 					d.update( m.groupdict() )

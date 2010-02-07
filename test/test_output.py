@@ -92,6 +92,10 @@ class Test_Output(object):
 		self.assert_contains("Label `label' multiply defined", -3)
 		self.assert_contains("There were multiply-defined labels", -2)
 	
+	def test_cite(self):
+		self.typeset('cite')
+		self.assert_contains('citation')
+		self.assert_contains(failure)
 ## 	def test_no_tmp_dif(self):
 ## 		self.t.typeset_file('simple')
 	
