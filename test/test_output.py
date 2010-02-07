@@ -11,10 +11,10 @@ import re
 
 import nose.tools as nt
 
-success = '\x1B[01;32m'
-failure = '\x1B[01;31m'
-ref_warning = "\x1B[01;35m"
-warning = '\x1B[01;33m'
+success = '\x1B[32;01m'
+failure = '\x1B[31;01m'
+ref_warning = "\x1B[35;01m"
+warning = '\x1B[35;01m'
 
 class Test_Output(object):
 	
@@ -23,14 +23,14 @@ class Test_Output(object):
 		self.t = Typesetter()
 		self.t.rm_tmp_dir()
 	
-	def mk_tmp(self, content):
-		import tempfile
-		f = tempfile.NamedTemporaryFile(suffix='.tex', dir=tmp_dir)
-		f.write(content)
-		return f
-	
+## 	def mk_tmp(self, content):
+## 		import tempfile
+## 		f = tempfile.NamedTemporaryFile(suffix='.tex', dir=tmp_dir)
+## 		f.write(content)
+## 		return f
+## 	
 	def typeset(self, file_name):
-		self.output = Popen(['pydflatex', file_name], stdout=PIPE).communicate()[0]
+		self.output = Popen(['pydflatex', file_name], stderr=PIPE).communicate()[1]
 
 	def assert_contains(self, match, line=None):
 ## 		does_match = re.search(match, self.output)
@@ -64,8 +64,8 @@ class Test_Output(object):
 	
 	def test_wrong_ext(self):
 		self.typeset('simple.xxx')
-		self.assert_contains(failure)
 		self.assert_contains('Wrong extension for simple.xxx')
+		self.assert_contains(failure)
 	
 	def test_trailing_dot(self):
 		self.typeset('simple.')
@@ -73,9 +73,10 @@ class Test_Output(object):
 	
 	def test_ref(self):
 		self.typeset('ref')
-		self.assert_contains("Reference `nonexistent' undefined", -4)
+		self.assert_contains("undefined", -4)
+		self.assert_contains("nonexistent", -4)
 		self.assert_contains('There were undefined references.', -3)
-		self.assert_contains(ref_warning, -4)
+## 		self.assert_contains(ref_warning, -4)
 		self.assert_contains(warning, -3)
 	
 	def test_rerun(self):

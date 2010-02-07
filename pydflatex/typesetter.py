@@ -12,17 +12,38 @@ import sys
 import shutil
 import time
 
-stream = sys.stdout
 
 import logging
 from pygments.console import ansiformat
 
 class LaTeXLogger(logging.Logger):
-	def box(self, page, msg):
-		self.info('%4s: %s' % (page or '', msg))
+	line_template = '%-5s'
+	page_template = 'p.%-3s'
+	package_template = ' [%s]'
+	head_template = '%s: '
 	
-	def latex_warning(self, line, package, msg):
-		self.warning('%4s: [%s] %s' % (line, package, msg))
+	def box(self, page, msg):
+		head = ''
+		if page:
+			head += self.page_template % page
+		self.info(ansiformat('teal', '%s: %s' % (head, msg)))
+	
+	def warning(self, msg):
+		logging.Logger.warning(self, ansiformat('fuchsia', msg))
+	
+	def latex_warning(self, warning):
+		head = ''
+		line = warning.get('line','')
+		if line:
+			head += self.line_template % line
+		if head:
+			head = self.head_template % head
+		package = warning.get('package','')
+		mid = ''
+		if package:
+			mid += self.package_template % package
+		msg = '%s%s %s' % (head, mid, warning['text'])
+		self.warning(msg)
 	
 	def error(self, msg):
 		logging.Logger.error(self, ansiformat('*red*', msg))
@@ -31,7 +52,28 @@ class LaTeXLogger(logging.Logger):
 		self.info(ansiformat('*green*', msg))
 	
 	def ref_warning(self, ref):
-		self.warning("%4s: %s %s p.%s" % (ref.get('line',''), ansiformat('red', ref.get('ref','')), 'undefined', ref.get('page','')))
+		head = ''
+		line = ref.get('line','')
+		page = ref.get('page','')
+		if line:
+			head += self.line_template % line
+		mid = ''
+		if page:
+			mid += self.page_template % page
+		undefined = ref.get('ref','')
+		if undefined:
+			self.info("%s%s: '%s' %s" % (head, mid, ansiformat('red', undefined), 'undefined'))
+		else:
+			if head or mid:
+				mid += self.head_template % mid
+			self.warning("%s%s%s" % (head, mid, ref['text']))
+	
+	def strong_info(self, msg):
+		"""
+		message in bold
+		"""
+		self.info(ansiformat('*black*', msg))
+	
 ## class ColoredFormatter(logging.Formatter):
 ## 	use_color = True
 ## 	
@@ -54,7 +96,7 @@ logger = LaTeXLogger('pydflatex')
 logger.setLevel(logging.DEBUG)
 
 handler = logging.StreamHandler()
-handler.setLevel(logging.DEBUG)
+handler.setLevel(logging.INFO)
 
 ## formatter = logging.Formatter('%(message)s')
 ## handler.setFormatter(formatter)
@@ -64,6 +106,7 @@ logger.addHandler(handler)
 def eprint(msg='', flag=None):
 	logger.debug(msg)
 ## # message print
+## stream = sys.stderr
 ## flags = {'E': "\x1B[01;31m", 'no':'', 'G': "\x1B[01;32m", 'W': "\x1B[01;33m", 'B': "\x1B[00;36m", 'R': "\x1B[01;35m", 'M': "\x1B[03;00m"}
 ## def eprint(msg='', flag='no'):
 ##	print >> stream, flags[flag],
@@ -164,13 +207,13 @@ class Typesetter(object):
 			# following should be filtered via the loggers filter!
 			if warning.get('pkg') == 'hyperref' and warning['text'].find('Token') != -1:
 				continue # I hate those hyperref warning
-			package = warning.get('pkg')
+## 			package = warning.get('pkg')
 ##			if package:
 ##				package = ' [%s]' % package
 ##			eprint(repr(warning), 'E')
 ##			eprint("%4s:%s %s" % (warning.get('line',''), package, warning['text']), 'W')
-			logger.latex_warning(warning.get('line'), warning.get('package'), warning['text'])
-		eprint()
+			logger.latex_warning(warning)
+## 		eprint()
 		for error in parser.get_errors():
 			logger.error("%s %4s: %s" % (error['file'], error.get('line',''), error['text']))
 			if error.get('code'): # if the code is available we print it:
@@ -249,19 +292,19 @@ class Typesetter(object):
 		
 		for run_nb in range(self.max_run):
 			# run pdflatex
-			eprint("\n\tpdflatex run number %d\n" % (run_nb + 1))
+			logger.strong_info("pdflatex run number %d" % (run_nb + 1))
 			command = 'pdflatex -etex -no-mktex=pk %s	-interaction=batchmode --output-directory=%s %s' % (["", "-halt-on-error"][self.halt_on_errors], self.tmp_dir, root)
-			eprint(command)
+			logger.debug(command)
 			os.popen(command)
 			try:
 				self.parse_log(log_file)
 			except KeyboardInterrupt:
-				eprint ("Keyboard Interruption", 'E')
+				logger.error("Keyboard Interruption")
 				sys.exit()
 			except IOError: # if the file is invalid or doesn't exist
-				eprint("Log file not found")
+				logger.error("Log file not found")
 			except ValueError:
-				eprint("Wrong format of the log file")
+				logger.error("Wrong format of the log file")
 				break # stop processing this file
 			else:
 				self.move_auxiliary(base,file_base)
