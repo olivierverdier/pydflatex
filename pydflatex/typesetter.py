@@ -180,7 +180,9 @@ class Typesetter(object):
 		for run_nb in range(self.max_run):
 			# run pdflatex
 			eprint("\n\tpdflatex run number %d\n" % (run_nb + 1))
-			os.popen('pdflatex --shell-escape -no-mktex=pk %s	 -interaction=batchmode --output-directory=%s %s' % (["", "-halt-on-error"][self.halt_on_errors], self.tmp_dir, root))
+			command = 'pdflatex -etex -no-mktex=pk %s	-interaction=batchmode --output-directory=%s %s' % (["", "-halt-on-error"][self.halt_on_errors], self.tmp_dir, root)
+			eprint(command)
+			os.popen(command)
 			try:
 				self.parse_log(log_file)
 			except KeyboardInterrupt:

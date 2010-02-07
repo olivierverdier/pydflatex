@@ -41,11 +41,11 @@ add_option(parser, '-w', '--warning', help='remove over/underfull warnings', des
 (options,args) = parser.parse_args()
 
 
-
 typesetter = Typesetter(**options.__dict__)
 try:
 	typesetter.run(args)
 except Exception, e:
 	import sys
+	print 'Exception', e
 	sys.exit(1)
 
