@@ -14,19 +14,67 @@ import time
 
 stream = sys.stdout
 
+import logging
+from pygments.console import ansiformat
+
+class LaTeXLogger(logging.Logger):
+	def box(self, page, msg):
+		self.info('%4s: %s' % (page or '', msg))
+	
+	def latex_warning(self, line, package, msg):
+		self.warning('%4s: [%s] %s' % (line, package, msg))
+	
+	def error(self, msg):
+		logging.Logger.error(self, ansiformat('*red*', msg))
+	
+	def success(self, msg):
+		logging.info(ansiformat('*green*', msg))
+	
+	def ref_warning(self, ref):
+		self.warning("%4s: %s %s p.%s" % (ref.get('line',''), ansiformat('red', ref.get('ref','')), 'undefined', ref.get('page','')))
+## class ColoredFormatter(logging.Formatter):
+## 	use_color = True
+## 	
+## 	colors = {'ERROR': '*red*'}
+## 	
+## 	def __init__(self, msg, use_color = True):
+## 		logging.Formatter.__init__(self, msg)
+## 		self.use_color = use_color
+## 
+## 	def format(self, record):
+## 		levelname = record.levelname
+## 		
+## 		if self.use_color and levelname in COLORS:
+## 			levelname_color = COLOR_SEQ % (30 + COLORS[levelname]) + levelname + RESET_SEQ
+## 			record.levelname = levelname_color
+## 		return logging.Formatter.format(self, record)
+
+
+logger = LaTeXLogger('pydflatex')
+logger.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler()
+handler.setLevel(logging.DEBUG)
+
+## formatter = logging.Formatter('%(message)s')
+## handler.setFormatter(formatter)
+
+logger.addHandler(handler)
+
+def eprint(msg='', flag=None):
+	logger.debug(msg)
 ## # message print
 ## flags = {'E': "\x1B[01;31m", 'no':'', 'G': "\x1B[01;32m", 'W': "\x1B[01;33m", 'B': "\x1B[00;36m", 'R': "\x1B[01;35m", 'M': "\x1B[03;00m"}
 ## def eprint(msg='', flag='no'):
-## 	print >> stream, flags[flag],
-## 	print >> stream, msg,
-## 	print >> stream, "\x1B[00;00m"
+##	print >> stream, flags[flag],
+##	print >> stream, msg,
+##	print >> stream, "\x1B[00;00m"
 
 
-from pygments.console import ansiformat
 
 flags = {None: '', 'E': '*red*', 'G': 'green', 'W': 'fuchsia', 'B': 'teal', 'R': 'purple'}
-def eprint(msg='', flag=None):
-	print ansiformat(flags[flag], msg)
+## def eprint(msg='', flag=None):
+##	print ansiformat(flags[flag], msg)
 	
 class Typesetter(object):
 	def __init__(self, **options):
@@ -106,24 +154,27 @@ class Typesetter(object):
 			if has_occ != -1:
 				box['text'] = box['text'][:has_occ]
 			if not self.suppress_warning:
-				eprint("%4s: %s" % (box.get('page', ''), box['text']), 'B')
+##				eprint("%4s: %s" % (box.get('page', ''), box['text']), 'B')
+				logger.box(box.get('page'), box['text'])
 		for ref in parser.get_references():
-## 			eprint(repr(ref), 'E')
-			eprint("%4s: %s %s p.%s" % (ref.get('line',''), ansiformat('red', ref.get('ref','')), 'undefined', ref.get('page','')))
-## 			eprint("%4s: %s" % (ref.get('line',''), ref['text']), 'R')
+##			eprint(repr(ref), 'E')
+			logger.ref_warning(ref)
+##			eprint("%4s: %s" % (ref.get('line',''), ref['text']), 'R')
 		for warning in parser.get_warnings():
+			# following should be filtered via the loggers filter!
 			if warning.get('pkg') == 'hyperref' and warning['text'].find('Token') != -1:
 				continue # I hate those hyperref warning
-			package = warning.get('pkg', '')
-			if package:
-				package = ' [%s]' % package
-			eprint(repr(warning), 'E')
-			eprint("%4s:%s %s" % (warning.get('line',''), package, warning['text']), 'W')
+			package = warning.get('pkg')
+##			if package:
+##				package = ' [%s]' % package
+##			eprint(repr(warning), 'E')
+##			eprint("%4s:%s %s" % (warning.get('line',''), package, warning['text']), 'W')
+			logger.latex_warning(warning.get('line'), warning.get('package'), warning['text'])
 		eprint()
 		for error in parser.get_errors():
-			eprint("%s %4s: %s" % (error['file'], error.get('line',''), error['text']), 'E')
+			logger.error("%s %4s: %s" % (error['file'], error.get('line',''), error['text']))
 			if error.get('code'): # if the code is available we print it:
-				eprint("%4s:\t %s" % (error.get('line',''), error['code']))
+				logger.error("%4s:\t %s" % (error.get('line',''), error['code']))
 	
 	def move_auxiliary(self, base, file_base):
 		"""
@@ -150,12 +201,12 @@ class Typesetter(object):
 				if os.uname()[0] == 'Darwin': # on Mac OS X we hide all moved files...
 					if aux_ext != 'pdf': # ...except the pdf
 						if os.system('/Developer/Tools/SetFile -a V %s' % final_path):
-							eprint("Install the Developer Tools if you want the auxiliary files to get invisible", 'W')
+							logger.info("Install the Developer Tools if you want the auxiliary files to get invisible")
 
 			except IOError:
 				if aux_ext == 'pdf':
 					message = 'pdf file "%s" not found.' % aux_name
-					eprint('\n\t%s' % message, 'E')
+					logger.error('\n\t%s' % message)
 					raise IOError(message)
 
 
@@ -175,7 +226,7 @@ class Typesetter(object):
 		root, file_ext = os.path.splitext(tex_path)
 		if file_ext[1:]:
 			if file_ext[1:] != 'tex':
-				eprint("Wrong extension for %s" % tex_path, 'E')
+				logger.error("Wrong extension for %s" % tex_path)
 				return
 			else:
 				full_path = tex_path
@@ -184,14 +235,14 @@ class Typesetter(object):
 		
 		# make sure that the file exists
 		if not os.path.exists(full_path):
-			eprint('File %s not found' % full_path, 'E')
+			logger.error('File %s not found' % full_path)
 			return
 
 
 		# log file
 		log_file = os.path.join(self.tmp_dir, file_base + os.path.extsep + 'log')
 
-		eprint('Typesetting %s\n' % full_path)
+		logger.info('Typesetting %s\n' % full_path)
 		
 		# preparing the extra run slot
 		self.extra_run_slot = extra_run
@@ -222,7 +273,7 @@ class Typesetter(object):
 						break
 
 		time_end = time.time()
-		eprint('Typesetting of "%s" completed in %ds.' % (full_path, int(time_end - time_start)), 'G')
+		logger.success('Typesetting of "%s" completed in %ds.' % (full_path, int(time_end - time_start)))
 		if self.open:
-			eprint('Opening "%s"...' % self.current_pdf_name)
+			logger.info('Opening "%s"...' % self.current_pdf_name)
 			os.system('/usr/bin/open "%s"' % self.current_pdf_name)
