@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# (c) Olivier Verdier <olivier.verdier@gmail.com>, 2007-2009
+# (c) Olivier Verdier <olivier.verdier@gmail.com>, 2007-2010
 """
 A wrapper around pdflatex to allow:
 - hiding of the temporary files in various ways
@@ -14,13 +14,20 @@ import time
 
 stream = sys.stdout
 
-# message print
-flags = {'E': "\x1B[01;31m", 'no':'', 'G': "\x1B[01;32m", 'W': "\x1B[01;33m", 'B': "\x1B[00;36m", 'R': "\x1B[01;35m", 'M': "\x1B[03;00m"}
-def eprint(msg='', flag='no'):
-	print >> stream, flags[flag],
-	print >> stream, msg,
-	print >> stream, "\x1B[00;00m"
+## # message print
+## flags = {'E': "\x1B[01;31m", 'no':'', 'G': "\x1B[01;32m", 'W': "\x1B[01;33m", 'B': "\x1B[00;36m", 'R': "\x1B[01;35m", 'M': "\x1B[03;00m"}
+## def eprint(msg='', flag='no'):
+## 	print >> stream, flags[flag],
+## 	print >> stream, msg,
+## 	print >> stream, "\x1B[00;00m"
 
+
+from pygments.console import ansiformat
+
+flags = {None: '', 'E': '*red*', 'G': 'green', 'W': 'fuchsia', 'B': 'teal', 'R': 'purple'}
+def eprint(msg='', flag=None):
+	print ansiformat(flags[flag], msg)
+	
 class Typesetter(object):
 	def __init__(self, **options):
 		# storing the options
@@ -101,13 +108,16 @@ class Typesetter(object):
 			if not self.suppress_warning:
 				eprint("%4s: %s" % (box.get('page', ''), box['text']), 'B')
 		for ref in parser.get_references():
-			eprint("%4s: %s" % (ref.get('line',''), ref['text']), 'R')
+## 			eprint(repr(ref), 'E')
+			eprint("%4s: %s %s p.%s" % (ref.get('line',''), ansiformat('red', ref.get('ref','')), 'undefined', ref.get('page','')))
+## 			eprint("%4s: %s" % (ref.get('line',''), ref['text']), 'R')
 		for warning in parser.get_warnings():
 			if warning.get('pkg') == 'hyperref' and warning['text'].find('Token') != -1:
 				continue # I hate those hyperref warning
 			package = warning.get('pkg', '')
 			if package:
 				package = ' [%s]' % package
+			eprint(repr(warning), 'E')
 			eprint("%4s:%s %s" % (warning.get('line',''), package, warning['text']), 'W')
 		eprint()
 		for error in parser.get_errors():
