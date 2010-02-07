@@ -73,14 +73,25 @@ class Test_Output(object):
 	
 	def test_ref(self):
 		self.typeset('ref')
-		self.assert_contains("undefined", -4)
-		self.assert_contains("nonexistent", -4)
-		self.assert_contains('There were undefined references.', -3)
+		self.assert_contains("undefined")
+		self.assert_contains("nonexistent")
+		self.assert_contains('There were undefined references.', -2)
 ## 		self.assert_contains(ref_warning, -4)
-		self.assert_contains(warning, -3)
+		self.assert_contains(warning, -2)
 	
 	def test_rerun(self):
 		self.typeset('rerun')
 		self.assert_contains('Rerun')
 		self.assert_contains('pdflatex run number 2')
 		self.assert_success
+	
+	def test_twice_label(self):
+		self.typeset('twicelabel')
+		self.assert_contains(warning,-2)
+		self.assert_contains(warning,-3)
+		self.assert_contains("Label `label' multiply defined", -3)
+		self.assert_contains("There were multiply-defined labels", -2)
+	
+## 	def test_no_tmp_dif(self):
+## 		self.t.typeset_file('simple')
+	

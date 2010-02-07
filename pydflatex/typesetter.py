@@ -19,8 +19,8 @@ from pygments.console import ansiformat
 class LaTeXLogger(logging.Logger):
 	line_template = '%-5s'
 	page_template = 'p.%-3s'
-	package_template = ' [%s]'
-	head_template = '%s: '
+	package_template = '[%s]'
+	head_template = '%s%s%s: '
 	
 	def box(self, page, msg):
 		head = ''
@@ -31,18 +31,27 @@ class LaTeXLogger(logging.Logger):
 	def warning(self, msg):
 		logging.Logger.warning(self, ansiformat('fuchsia', msg))
 	
-	def latex_warning(self, warning):
-		head = ''
-		line = warning.get('line','')
+	def get_page_line(self, info):
+		line_str = ''
+		line = info.get('line','')
+		page = info.get('page','')
 		if line:
-			head += self.line_template % line
-		if head:
-			head = self.head_template % head
-		package = warning.get('package','')
-		mid = ''
+			line_str += self.line_template % line
+		page_str = ''
+		if page:
+			page_str += self.page_template % page
+		package_str = ''
+		package = info.get('pkg')
 		if package:
-			mid += self.package_template % package
-		msg = '%s%s %s' % (head, mid, warning['text'])
+			package_str += self.package_template % package
+		if line_str or page_str:
+			return self.head_template % (package_str, page_str, line_str)
+		return ''
+			
+	
+	def latex_warning(self, warning):
+		head = self.get_page_line(warning)
+		msg = '%s%s' % (head, warning['text'])
 		self.warning(msg)
 	
 	def error(self, msg):
@@ -52,21 +61,12 @@ class LaTeXLogger(logging.Logger):
 		self.info(ansiformat('*green*', msg))
 	
 	def ref_warning(self, ref):
-		head = ''
-		line = ref.get('line','')
-		page = ref.get('page','')
-		if line:
-			head += self.line_template % line
-		mid = ''
-		if page:
-			mid += self.page_template % page
 		undefined = ref.get('ref','')
+		head = self.get_page_line(ref)
 		if undefined:
-			self.info("%s%s: '%s' %s" % (head, mid, ansiformat('red', undefined), 'undefined'))
+			self.info("%s'%s' %s" % (head, ansiformat('red', undefined), 'undefined'))
 		else:
-			if head or mid:
-				mid += self.head_template % mid
-			self.warning("%s%s%s" % (head, mid, ref['text']))
+			self.warning("%s%s" % (head, ref['text']))
 	
 	def strong_info(self, msg):
 		"""
@@ -127,7 +127,7 @@ class Typesetter(object):
 		# loading the log parser
 		from pydflatex.latexlogparser import LogCheck
 		self.parser = LogCheck()
-		self.tmp_dir = self.create_tmp_dir(os.path.curdir)
+		self.tmp_dir = self.create_tmp_dir()
 
 	# maximum number of pdflatex runs
 	max_run = 5
@@ -154,7 +154,7 @@ class Typesetter(object):
 	move_exts = ['pdfsync','pdf']
 
 	
-	def create_tmp_dir(self, base):
+	def create_tmp_dir(self, base=os.path.curdir):
 		"""
 		Create the temporary directory if it doesn't exist
 		return the tmp_dir
@@ -180,6 +180,7 @@ class Typesetter(object):
 		# clean up first if needed
 		if self.clean_up:
 			self.rm_tmp_dir()
+			self.create_tmp_dir()
 		# easier to write with one file
 		if not isinstance(file_paths, (list, tuple)):
 			file_paths = [file_paths]
