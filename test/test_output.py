@@ -53,18 +53,20 @@ class Test_Output(object):
 	def typeset(self, file_name):
 ## 		self.output = Popen([bin_path, file_name], stderr=PIPE).communicate()[1]
 		try:
-			self.t.run(file_name)
+			self.t.run(os.path.join(test_dir, file_name))
 		except Exception, e:
 			return e
 		finally:
 			self.output = self.logfile.read()
 
-	def assert_contains(self, match, line=None):
-## 		does_match = re.search(match, self.output)
+	def assert_contains(self, match, line=None, regexp=False):
 		out = self.output
 		if line is not None:
 			out = out.splitlines()[line]
-		does_match = out.find(match) != -1
+		if not regexp:
+			does_match = out.find(match) != -1
+		else:
+			does_match = re.search(match, self.output)
 		if not does_match:
 			raise AssertionError("'%s' not in\n%s" % (match, out))
 	
@@ -75,7 +77,7 @@ class Test_Output(object):
 			
 	def test_simple(self):
 		self.typeset('simple')
-		self.assert_contains('Typesetting simple.tex', 0)
+		self.assert_contains('Typesetting %s/simple.tex' % test_dir, 0)
 		self.assert_contains('Typeset', -1)
 		self.assert_contains(success)
 	
@@ -88,11 +90,11 @@ class Test_Output(object):
 	def test_non_exist(self):
 		self.typeset('nonexistent')
 		self.assert_contains(failure)
-		self.assert_contains('File nonexistent.tex not found')
+		self.assert_contains('File %s/nonexistent.tex not found' % test_dir)
 	
 	def test_wrong_ext(self):
 		self.typeset('simple.xxx')
-		self.assert_contains('Wrong extension for simple.xxx')
+		self.assert_contains('Wrong extension for %s/simple.xxx' % test_dir)
 		self.assert_contains(failure)
 	
 	def test_trailing_dot(self):
