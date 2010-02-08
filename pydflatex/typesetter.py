@@ -147,14 +147,18 @@ class Typesetter(object):
 		"""
 		shutil.rmtree(self.tmp_dir)
 	
+	def clean_up_tmp_dir(self):
+		self.rm_tmp_dir()
+		self.create_tmp_dir()
+
+	
 	def run(self, file_paths):
 		"""
 		Compile several files at once
 		"""
 		# clean up first if needed
 		if self.clean_up:
-			self.rm_tmp_dir()
-			self.create_tmp_dir()
+			self.clean_up_tmp_dir()
 		# easier to write with one file
 		if not isinstance(file_paths, (list, tuple)):
 			file_paths = [file_paths]

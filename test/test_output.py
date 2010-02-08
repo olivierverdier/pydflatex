@@ -2,8 +2,18 @@
 from __future__ import division
 
 import os
-root = os.path.dirname(__file__)
-tmp_dir = os.path.join(root, '.tmp')
+test_dir = os.path.dirname(__file__)
+tmp_dir = os.path.join(test_dir, '.tmp')
+
+import tempfile
+
+
+## bin_path = os.path.join(test_dir, os.path.pardir, 'bin', 'pydflatex')
+
+## mod_path = os.path.join(test_dir, os.path.pardir)
+## import sys
+## sys.path.insert(0, mod_path)
+## print sys.path
 
 from subprocess import Popen, PIPE
 
@@ -20,8 +30,19 @@ class Test_Output(object):
 	
 	def setUp(self):
 		from pydflatex import Typesetter
+		from pydflatex.typesetter import LaTeXLogger
 		self.t = Typesetter()
-		self.t.rm_tmp_dir()
+		self.t.clean_up_tmp_dir()
+		self.logfile = tempfile.NamedTemporaryFile()
+		import logging
+		self.handler = logging.FileHandler(self.logfile.name)
+		logger = LaTeXLogger('log')
+		logger.addHandler(self.handler)
+		self.t.logger = logger
+		
+	def tearDown(self):
+		self.t.logger.removeHandler(self.handler)
+		self.logfile.close()
 	
 ## 	def mk_tmp(self, content):
 ## 		import tempfile
@@ -30,7 +51,13 @@ class Test_Output(object):
 ## 		return f
 ## 	
 	def typeset(self, file_name):
-		self.output = Popen(['pydflatex', file_name], stderr=PIPE).communicate()[1]
+## 		self.output = Popen([bin_path, file_name], stderr=PIPE).communicate()[1]
+		try:
+			self.t.run(file_name)
+		except Exception, e:
+			return e
+		finally:
+			self.output = self.logfile.read()
 
 	def assert_contains(self, match, line=None):
 ## 		does_match = re.search(match, self.output)
@@ -53,7 +80,8 @@ class Test_Output(object):
 		self.assert_contains(success)
 	
 	def test_error(self):
-		self.typeset('error')
+		e = self.typeset('error')
+		nt.assert_true(isinstance(e,IOError))
 		self.assert_contains(r'3: Undefined control sequence \nonexistingmacro.')
 		self.assert_contains(failure)
 	
