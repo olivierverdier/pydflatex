@@ -8,7 +8,7 @@ tmp_dir = os.path.join(test_dir, '.tmp')
 import tempfile
 
 
-## bin_path = os.path.join(test_dir, os.path.pardir, 'bin', 'pydflatex')
+bin_path = os.path.join(test_dir, os.path.pardir, 'bin', 'pydflatex')
 
 ## mod_path = os.path.join(test_dir, os.path.pardir)
 ## import sys
@@ -50,8 +50,9 @@ class Test_Output(object):
 ## 		f.write(content)
 ## 		return f
 ## 	
-	def typeset(self, file_name):
-## 		self.output = Popen([bin_path, file_name], stderr=PIPE).communicate()[1]
+	def typeset(self, file_name, with_binary=False):
+		if with_binary:
+			self.output = Popen([bin_path, file_name], stderr=PIPE).communicate()[1]
 		try:
 			self.t.run(os.path.join(test_dir, file_name))
 		except Exception, e:
@@ -128,4 +129,8 @@ class Test_Output(object):
 		self.assert_contains(failure)
 ## 	def test_no_tmp_dif(self):
 ## 		self.t.typeset_file('simple')
+	
+	def test_binary(self):
+		self.typeset('simple', with_binary=True)
+		self.assert_contains('Typesetting %s/simple.tex' % test_dir, 0)
 	
