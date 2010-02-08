@@ -14,7 +14,13 @@ import time
 
 
 import logging
-from pygments.console import ansiformat
+try:
+	from pygments.console import ansiformat
+except ImportError:
+	# pygment is not found...
+	# in black/white it will be
+	def ansiformat(format, msg):
+		return msg
 
 class LaTeXLogger(logging.Logger):
 	line_template = 'L%-5s'

@@ -21,10 +21,18 @@ import re
 
 import nose.tools as nt
 
-success = '\x1B[32;01m'
-failure = '\x1B[31;01m'
-ref_warning = "\x1B[35;01m"
-warning = '\x1B[35;01m'
+try:
+	import pygments
+except ImportError:
+	success = ''
+	failure = ''
+	ref_warning = ''
+	warning = ''
+else:
+	success = '\x1B[32;01m'
+	failure = '\x1B[31;01m'
+	ref_warning = "\x1B[35;01m"
+	warning = '\x1B[35;01m'
 
 class Test_Output(object):
 	
