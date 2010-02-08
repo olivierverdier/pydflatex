@@ -17,8 +17,8 @@ import logging
 from pygments.console import ansiformat
 
 class LaTeXLogger(logging.Logger):
-	line_template = '%-5s'
-	page_template = 'p.%-3s'
+	line_template = 'L%-5s'
+	page_template = 'p.%-4s'
 	package_template = '[%s]'
 	head_template = '%s%s%s: '
 	
@@ -61,10 +61,13 @@ class LaTeXLogger(logging.Logger):
 		self.info(ansiformat('*green*', msg))
 	
 	def ref_warning(self, ref):
-		undefined = ref.get('ref','')
 		head = self.get_page_line(ref)
+		undefined = ref.get('ref','')
+		citation = ref.get('cite', '')
 		if undefined:
 			self.info("%s'%s' %s" % (head, ansiformat('red', undefined), 'undefined'))
+		elif citation:
+			self.info("%s[%s] %s" % (head, ansiformat('red', citation), 'undefined'))
 		else:
 			self.warning("%s%s" % (head, ref['text']))
 	
@@ -76,8 +79,8 @@ class LaTeXLogger(logging.Logger):
 	
 
 
-logger = LaTeXLogger('pydflatex')
-logger.setLevel(logging.DEBUG)
+stderr_logger = LaTeXLogger('pydflatex')
+stderr_logger.setLevel(logging.DEBUG)
 
 handler = logging.StreamHandler()
 handler.setLevel(logging.INFO)
@@ -85,7 +88,7 @@ handler.setLevel(logging.INFO)
 ## formatter = logging.Formatter('%(message)s')
 ## handler.setFormatter(formatter)
 
-logger.addHandler(handler)
+stderr_logger.addHandler(handler)
 
 	
 class Typesetter(object):
@@ -100,6 +103,8 @@ class Typesetter(object):
 
 	# maximum number of pdflatex runs
 	max_run = 5
+	
+	logger = stderr_logger
 	
 	tmp_dir_name = '.latex_tmp'
 	
@@ -167,18 +172,18 @@ class Typesetter(object):
 			if has_occ != -1:
 				box['text'] = box['text'][:has_occ]
 			if not self.suppress_warning:
-				logger.box(box.get('page'), box['text'])
+				self.logger.box(box.get('page'), box['text'])
 		for ref in parser.get_references():
-			logger.ref_warning(ref)
+			self.logger.ref_warning(ref)
 		for warning in parser.get_warnings():
 			# following should be filtered via the loggers filter!
 			if warning.get('pkg') == 'hyperref' and warning['text'].find('Token') != -1:
 				continue # I hate those hyperref warning
-			logger.latex_warning(warning)
+			self.logger.latex_warning(warning)
 		for error in parser.get_errors():
-			logger.error("%s %4s: %s" % (error['file'], error.get('line',''), error['text']))
+			self.logger.error("%s %4s: %s" % (error['file'], error.get('line',''), error['text']))
 			if error.get('code'): # if the code is available we print it:
-				logger.error("%4s:\t %s" % (error.get('line',''), error['code']))
+				self.logger.error("%4s:\t %s" % (error.get('line',''), error['code']))
 	
 	def move_auxiliary(self, base, file_base):
 		"""
@@ -205,12 +210,12 @@ class Typesetter(object):
 				if os.uname()[0] == 'Darwin': # on Mac OS X we hide all moved files...
 					if aux_ext != 'pdf': # ...except the pdf
 						if os.system('/Developer/Tools/SetFile -a V %s' % final_path):
-							logger.info("Install the Developer Tools if you want the auxiliary files to get invisible")
+							self.logger.info("Install the Developer Tools if you want the auxiliary files to get invisible")
 
 			except IOError:
 				if aux_ext == 'pdf':
 					message = 'pdf file "%s" not found.' % aux_name
-					logger.error('\n\t%s' % message)
+					self.logger.error('\n\t%s' % message)
 					raise IOError(message)
 
 
@@ -230,7 +235,7 @@ class Typesetter(object):
 		root, file_ext = os.path.splitext(tex_path)
 		if file_ext[1:]:
 			if file_ext[1:] != 'tex':
-				logger.error("Wrong extension for %s" % tex_path)
+				self.logger.error("Wrong extension for %s" % tex_path)
 				return
 			else:
 				full_path = tex_path
@@ -239,33 +244,33 @@ class Typesetter(object):
 		
 		# make sure that the file exists
 		if not os.path.exists(full_path):
-			logger.error('File %s not found' % full_path)
+			self.logger.error('File %s not found' % full_path)
 			return
 
 
 		# log file
 		log_file = os.path.join(self.tmp_dir, file_base + os.path.extsep + 'log')
 
-		logger.info('Typesetting %s\n' % full_path)
+		self.logger.info('Typesetting %s\n' % full_path)
 		
 		# preparing the extra run slot
 		self.extra_run_slot = extra_run
 		
 		for run_nb in range(self.max_run):
 			# run pdflatex
-			logger.strong_info("pdflatex run number %d" % (run_nb + 1))
+			self.logger.strong_info("pdflatex run number %d" % (run_nb + 1))
 			command = 'pdflatex -etex -no-mktex=pk %s	-interaction=batchmode --output-directory=%s %s' % (["", "-halt-on-error"][self.halt_on_errors], self.tmp_dir, root)
-			logger.debug(command)
+			self.logger.debug(command)
 			os.popen(command)
 			try:
 				self.parse_log(log_file)
 			except KeyboardInterrupt:
-				logger.error("Keyboard Interruption")
+				self.logger.error("Keyboard Interruption")
 				sys.exit()
 			except IOError: # if the file is invalid or doesn't exist
-				logger.error("Log file not found")
+				self.logger.error("Log file not found")
 			except ValueError:
-				logger.error("Wrong format of the log file")
+				self.logger.error("Wrong format of the log file")
 				break # stop processing this file
 			else:
 				self.move_auxiliary(base,file_base)
@@ -277,7 +282,7 @@ class Typesetter(object):
 						break
 
 		time_end = time.time()
-		logger.success('Typesetting of "%s" completed in %ds.' % (full_path, int(time_end - time_start)))
+		self.logger.success('Typesetting of "%s" completed in %ds.' % (full_path, int(time_end - time_start)))
 		if self.open:
-			logger.info('Opening "%s"...' % self.current_pdf_name)
+			self.logger.info('Opening "%s"...' % self.current_pdf_name)
 			os.system('/usr/bin/open "%s"' % self.current_pdf_name)
