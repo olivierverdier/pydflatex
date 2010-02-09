@@ -36,7 +36,7 @@ add_option(parser, '-c', '--clean-up', help='clean up auxiliary files', dest='cl
 
 add_option(parser, '-x', '--extra-run', help='run pdflatex one extra time', dest='extra_run', action='store_true')
 
-add_option(parser, '-w', '--warning', help='remove over/underfull warnings', dest='suppress_warning', action='store_true')
+add_option(parser, '-b', '--box-warning', help='remove over/underfull box warnings', dest='suppress_box_warning', action='store_true')
 
 (options,args) = parser.parse_args()
 

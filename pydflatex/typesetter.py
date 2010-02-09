@@ -148,7 +148,7 @@ class Typesetter(object):
 	
 	new_pdf_name = ''
 	
-	suppress_warning = False
+	suppress_box_warning = False
 
 	# extensions of the files that will be "pulled back" to the directory where the file is
 	# on Mac OS X those files will be set invisible
@@ -205,7 +205,7 @@ class Typesetter(object):
 			has_occ = box['text'].find(r' has occurred while \output is active')
 			if has_occ != -1:
 				box['text'] = box['text'][:has_occ]
-			if not self.suppress_warning:
+			if not self.suppress_box_warning:
 				self.logger.box(box.get('page'), box['text'])
 		for ref in parser.get_references():
 			self.logger.ref_warning(ref)

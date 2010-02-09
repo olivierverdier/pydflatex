@@ -22,17 +22,19 @@ import re
 import nose.tools as nt
 
 try:
-	import pygments
+	import pygments.console
 except ImportError:
 	success = ''
 	failure = ''
 	ref_warning = ''
 	warning = ''
+	box = ''
 else:
 	success = '\x1B[32;01m'
 	failure = '\x1B[31;01m'
 	ref_warning = "\x1B[35;01m"
 	warning = '\x1B[35;01m'
+	box = pygments.console.codes['teal']
 
 class Test_Output(object):
 	
@@ -142,3 +144,12 @@ class Test_Output(object):
 		self.typeset('simple', with_binary=True)
 		self.assert_contains('Typesetting %s/simple.tex' % test_dir, 0)
 	
+	def test_box(self):
+		self.typeset('box')
+		self.assert_contains('Overfull')
+		self.assert_contains(box)
+	
+	def test_nobox(self):
+		self.t.suppress_box_warning = True
+		self.typeset('box')
+		nt.assert_equal(self.output.find('Overfull'), -1)
