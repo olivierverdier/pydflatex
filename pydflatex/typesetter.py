@@ -29,15 +29,24 @@ class LaTeXLogger(logging.Logger):
 	head_template = '%s%s%s: '
 	
 	def box(self, page, msg):
+		"""
+		Box (over/underfull) warnings.
+		"""
 		head = ''
 		if page:
 			head += self.page_template % page
 		self.info(ansiformat('teal', '%s: %s' % (head, msg)))
 	
 	def warning(self, msg):
+		"""
+		LaTeX warning
+		"""
 		logging.Logger.warning(self, ansiformat('fuchsia', msg))
 	
 	def get_page_line(self, info):
+		"""
+		Extract the page and line information and formats it.
+		"""
 		line_str = ''
 		line = info.get('line','')
 		page = info.get('page','')
@@ -56,17 +65,29 @@ class LaTeXLogger(logging.Logger):
 			
 	
 	def latex_warning(self, warning):
+		"""
+		Extract the info from the `warning` object.
+		"""
 		head = self.get_page_line(warning)
 		msg = '%s%s' % (head, warning['text'])
 		self.warning(msg)
 	
 	def error(self, msg):
+		"""
+		Error (coloured)
+		"""
 		logging.Logger.error(self, ansiformat('*red*', msg))
 	
 	def success(self, msg):
+		"""
+		Success (coloured)
+		"""
 		self.info(ansiformat('*green*', msg))
 	
 	def ref_warning(self, ref):
+		"""
+		Special format for citation and reference warnings.
+		"""
 		head = self.get_page_line(ref)
 		undefined = ref.get('ref','')
 		citation = ref.get('cite', '')
@@ -77,9 +98,9 @@ class LaTeXLogger(logging.Logger):
 		else:
 			self.warning("%s%s" % (head, ref['text']))
 	
-	def strong_info(self, msg):
+	def message(self, msg):
 		"""
-		message in bold
+		Messages in bold
 		"""
 		self.info(ansiformat('*black*', msg))
 	
@@ -116,7 +137,7 @@ class Typesetter(object):
 	
 	halt_on_errors = True
 	
-	open = False
+	open_pdf = False
 	
 	clean_up = False
 	
@@ -154,6 +175,9 @@ class Typesetter(object):
 		shutil.rmtree(self.tmp_dir)
 	
 	def clean_up_tmp_dir(self):
+		"""
+		Cleans up the tmp dir, i.e., deletes it and create a new pristine one.
+		"""
 		self.rm_tmp_dir()
 		self.create_tmp_dir()
 
@@ -268,7 +292,7 @@ class Typesetter(object):
 		
 		for run_nb in range(self.max_run):
 			# run pdflatex
-			self.logger.strong_info("pdflatex run number %d" % (run_nb + 1))
+			self.logger.message("pdflatex run number %d" % (run_nb + 1))
 			command = 'pdflatex -etex -no-mktex=pk %s	-interaction=batchmode --output-directory=%s %s' % (["", "-halt-on-error"][self.halt_on_errors], self.tmp_dir, root)
 			self.logger.debug(command)
 			os.popen(command)
@@ -293,6 +317,6 @@ class Typesetter(object):
 
 		time_end = time.time()
 		self.logger.success('Typesetting of "%s" completed in %ds.' % (full_path, int(time_end - time_start)))
-		if self.open:
+		if self.open_pdf:
 			self.logger.info('Opening "%s"...' % self.current_pdf_name)
 			os.system('/usr/bin/open "%s"' % self.current_pdf_name)
