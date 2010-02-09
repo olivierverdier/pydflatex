@@ -53,6 +53,15 @@ class Test_Output(object):
 	def tearDown(self):
 		self.t.logger.removeHandler(self.handler)
 		self.logfile.close()
+		try:
+			pdf_name = self.t.current_pdf_name
+		except AttributeError:
+			pass
+		else:
+			try:
+				os.remove(pdf_name)
+			except OSError:
+				pass
 	
 ## 	def mk_tmp(self, content):
 ## 		import tempfile
