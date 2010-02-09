@@ -72,6 +72,11 @@ class LaTeXLogger(logging.Logger):
 		msg = '%s%s' % (head, warning['text'])
 		self.warning(msg)
 	
+	def latex_error(self, error):
+		self.error("%s:%s: %s" % (error['file'], error.get('line',''), error['text']))
+		if error.get('code'): # if the code is available we print it:
+			self.error("%4s:\t %s" % (error.get('line',''), error['code']))
+
 	def error(self, msg):
 		"""
 		Error (coloured)
@@ -215,9 +220,7 @@ class Typesetter(object):
 				continue # I hate those hyperref warning
 			self.logger.latex_warning(warning)
 		for error in parser.get_errors():
-			self.logger.error("%s %4s: %s" % (error['file'], error.get('line',''), error['text']))
-			if error.get('code'): # if the code is available we print it:
-				self.logger.error("%4s:\t %s" % (error.get('line',''), error['code']))
+			self.logger.latex_error(error)
 	
 	def move_auxiliary(self, base, file_base):
 		"""
@@ -249,7 +252,7 @@ class Typesetter(object):
 			except IOError:
 				if aux_ext == 'pdf':
 					message = 'pdf file "%s" not found.' % aux_name
-					self.logger.error('\n\t%s' % message)
+## 					self.logger.error('\n\t%s' % message)
 					raise IOError(message)
 
 
