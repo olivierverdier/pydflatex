@@ -68,8 +68,11 @@ class LaTeXLogger(logging.Logger):
 		"""
 		Extract the info from the `warning` object.
 		"""
+		msg = warning['text']
+		if msg == 'There were undefined references.':
+			return self.error(msg)
 		head = self.get_page_line(warning)
-		msg = '%s%s' % (head, warning['text'])
+		msg = '%s%s' % (head, msg)
 		self.warning(msg)
 	
 	def latex_error(self, error):

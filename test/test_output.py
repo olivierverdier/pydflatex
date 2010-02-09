@@ -118,7 +118,7 @@ class Test_Output(object):
 		self.assert_contains("nonexistent")
 		self.assert_contains('There were undefined references.', -2)
 ## 		self.assert_contains(ref_warning, -4)
-		self.assert_contains(warning, -2)
+		self.assert_contains(failure, -2)
 	
 	def test_rerun(self):
 		self.typeset('rerun')
