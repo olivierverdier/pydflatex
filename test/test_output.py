@@ -21,26 +21,21 @@ import re
 
 import nose.tools as nt
 
+
+
+from pydflatex import Typesetter
+from pydflatex.typesetter import LaTeXLogger
+
 try:
-	import pygments.console
+	import termcolor
 except ImportError:
-	success = ''
-	failure = ''
-	ref_warning = ''
-	warning = ''
-	box = ''
+	colours = dict([(key, '') for key in LaTeXLogger.colours])
 else:
-	success = '\x1B[32;01m'
-	failure = '\x1B[31;01m'
-	ref_warning = "\x1B[35;01m"
-	warning = '\x1B[35;01m'
-	box = pygments.console.codes['teal']
+	colours = dict([(key,termcolor.colored('', **colargs)[:-4]) for key, colargs in LaTeXLogger.colours.items()])
 
 class Test_Output(object):
 	
 	def setUp(self):
-		from pydflatex import Typesetter
-		from pydflatex.typesetter import LaTeXLogger
 		self.t = Typesetter()
 		self.t.clean_up_tmp_dir()
 		self.logfile = tempfile.NamedTemporaryFile()
@@ -93,29 +88,29 @@ class Test_Output(object):
 	def assert_success(self):
 		self.assert_contains('Typesetting of')
 		self.assert_contains('completed')
-		self.assert_contains(success)
+		self.assert_contains(colours['success'])
 			
 	def test_simple(self):
 		self.typeset('simple')
 		self.assert_contains('Typesetting %s/simple.tex' % test_dir, 0)
 		self.assert_contains('Typeset', -1)
-		self.assert_contains(success)
+		self.assert_contains(colours['success'])
 	
 	def test_error(self):
 		e = self.typeset('error')
 		nt.assert_true(isinstance(e,IOError))
 		self.assert_contains(r'3: Undefined control sequence \nonexistingmacro.')
-		self.assert_contains(failure)
+		self.assert_contains(colours['error'])
 	
 	def test_non_exist(self):
 		self.typeset('nonexistent')
-		self.assert_contains(failure)
+		self.assert_contains(colours['error'])
 		self.assert_contains('File %s/nonexistent.tex not found' % test_dir)
 	
 	def test_wrong_ext(self):
 		self.typeset('simple.xxx')
 		self.assert_contains('Wrong extension for %s/simple.xxx' % test_dir)
-		self.assert_contains(failure)
+		self.assert_contains(colours['error'])
 	
 	def test_trailing_dot(self):
 		self.typeset('simple.')
@@ -127,7 +122,7 @@ class Test_Output(object):
 		self.assert_contains("nonexistent")
 		self.assert_contains('There were undefined references.', -2)
 ## 		self.assert_contains(ref_warning, -4)
-		self.assert_contains(failure, -2)
+		self.assert_contains(colours['error'], -2)
 	
 	def test_rerun(self):
 		self.typeset('rerun')
@@ -137,15 +132,15 @@ class Test_Output(object):
 	
 	def test_twice_label(self):
 		self.typeset('twicelabel')
-		self.assert_contains(warning,-2)
-		self.assert_contains(warning,-3)
+		self.assert_contains(colours['warning'],-2)
+		self.assert_contains(colours['warning'],-3)
 		self.assert_contains("Label `label' multiply defined", -3)
 		self.assert_contains("There were multiply-defined labels", -2)
 	
 	def test_cite(self):
 		self.typeset('cite')
 		self.assert_contains('citation')
-		self.assert_contains(failure)
+		self.assert_contains(colours['error'])
 ## 	def test_no_tmp_dif(self):
 ## 		self.t.typeset_file('simple')
 	
@@ -156,7 +151,7 @@ class Test_Output(object):
 	def test_box(self):
 		self.typeset('box')
 		self.assert_contains('Overfull')
-		self.assert_contains(box)
+		self.assert_contains(colours['box'])
 	
 	def test_nobox(self):
 		self.t.suppress_box_warning = True

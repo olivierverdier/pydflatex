@@ -15,11 +15,11 @@ import time
 
 import logging
 try:
-	from pygments.console import ansiformat
+	from termcolor import colored
 except ImportError:
-	# pygment is not found...
+	# termcolor is not found...
 	# in black/white it will be
-	def ansiformat(format, msg):
+	def colored(msg, *args, **kwargs):
 		return msg
 
 class LaTeXLogger(logging.Logger):
@@ -28,6 +28,15 @@ class LaTeXLogger(logging.Logger):
 	package_template = '[%s]'
 	head_template = '%s%s%s: '
 	
+	colours = {
+	 	'success': {'color': 'green', 'attrs':['bold']},
+		'error' : {'color': 'red', 'attrs': ['bold']},
+		'ref_warning' : {'color': 'red', 'attrs':['bold']},
+		'warning' : {'color': 'magenta'},
+		'box' : {'color': 'cyan'},
+		'info': {'attrs': ['bold']}
+		}
+	
 	def box(self, page, msg):
 		"""
 		Box (over/underfull) warnings.
@@ -35,13 +44,13 @@ class LaTeXLogger(logging.Logger):
 		head = ''
 		if page:
 			head += self.page_template % page
-		self.info(ansiformat('teal', '%s: %s' % (head, msg)))
+		self.info(colored('%s: %s' % (head, msg), **self.colours['box']))
 	
 	def warning(self, msg):
 		"""
 		LaTeX warning
 		"""
-		logging.Logger.warning(self, ansiformat('fuchsia', msg))
+		logging.Logger.warning(self, colored(msg, **self.colours['warning']))
 	
 	def get_page_line(self, info):
 		"""
@@ -84,13 +93,13 @@ class LaTeXLogger(logging.Logger):
 		"""
 		Error (coloured)
 		"""
-		logging.Logger.error(self, ansiformat('*red*', msg))
+		logging.Logger.error(self, colored(msg, **self.colours['error']))
 	
 	def success(self, msg):
 		"""
 		Success (coloured)
 		"""
-		self.info(ansiformat('*green*', msg))
+		self.info(colored(msg, **self.colours['success']))
 	
 	def ref_warning(self, ref):
 		"""
@@ -100,9 +109,9 @@ class LaTeXLogger(logging.Logger):
 		undefined = ref.get('ref','')
 		citation = ref.get('cite', '')
 		if undefined:
-			self.info("%s'%s' %s" % (head, ansiformat('red', undefined), 'undefined'))
+			self.info("%s'%s' %s" % (head, colored(undefined, **self.colours['ref_warning']), 'undefined'))
 		elif citation:
-			self.info("%s[%s] %s" % (head, ansiformat('red', citation), 'undefined'))
+			self.info("%s[%s] %s" % (head, colored(citation, **self.colours['ref_warning']), 'undefined'))
 		else:
 			self.warning("%s%s" % (head, ref['text']))
 	
@@ -110,7 +119,7 @@ class LaTeXLogger(logging.Logger):
 		"""
 		Messages in bold
 		"""
-		self.info(ansiformat('*black*', msg))
+		self.info(colored(msg, **self.colours['info']))
 	
 
 
