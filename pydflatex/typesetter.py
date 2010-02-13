@@ -50,7 +50,7 @@ class LaTeXLogger(logging.Logger):
 		"""
 		LaTeX warning
 		"""
-		logging.Logger.warning(self, colored(msg, **self.colours['warning']))
+		logging.Logger.warning(self, msg)
 	
 	def get_page_line(self, info):
 		"""
@@ -81,7 +81,7 @@ class LaTeXLogger(logging.Logger):
 		if msg == 'There were undefined references.':
 			return self.error(msg)
 		head = self.get_page_line(warning)
-		msg = '%s%s' % (head, msg)
+		msg = '%s%s' % (head, colored(msg, **self.colours['warning']))
 		self.warning(msg)
 	
 	def latex_error(self, error):
@@ -113,7 +113,7 @@ class LaTeXLogger(logging.Logger):
 		elif citation:
 			self.info("%s[%s] %s" % (head, colored(citation, **self.colours['ref_warning']), 'undefined'))
 		else:
-			self.warning("%s%s" % (head, ref['text']))
+			self.latex_warning(ref)
 	
 	def message(self, msg):
 		"""
