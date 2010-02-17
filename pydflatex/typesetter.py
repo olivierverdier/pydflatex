@@ -8,9 +8,7 @@ A wrapper around pdflatex to allow:
 """
 
 import os
-import sys
 import shutil
-import time
 
 
 import logging
@@ -272,6 +270,7 @@ class Typesetter(object):
 		"""
 		Typeset one given file.
 		"""
+		import time
 		if extra_run is None:
 			extra_run = self.extra_run
 		time_start = time.time()
@@ -315,6 +314,7 @@ class Typesetter(object):
 				self.parse_log(log_file)
 			except KeyboardInterrupt:
 				self.logger.error("Keyboard Interruption")
+				import sys
 				sys.exit()
 			except IOError: # if the file is invalid or doesn't exist
 				self.logger.error("Log file not found")
