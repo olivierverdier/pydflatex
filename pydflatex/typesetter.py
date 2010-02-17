@@ -17,8 +17,8 @@ import logging
 try:
 	from termcolor import colored
 except ImportError:
-	# termcolor is not found...
-	# in black/white it will be
+	import warnings
+	warnings.warn('termcolor was not found: in black and white it will be')
 	def colored(msg, *args, **kwargs):
 		return msg
 
