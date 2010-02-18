@@ -157,3 +157,25 @@ class Test_Output(object):
 		self.t.suppress_box_warning = True
 		self.typeset('box')
 		nt.assert_equal(self.output.find('Overfull'), -1)
+	
+	def test_pdfsync(self):
+		"""
+		The auxiliary file pdfsync was moved to the current directory.
+		"""
+		aux = 'pdfsync.pdfsync'
+		try:
+			os.remove(aux)
+		except OSError:
+			pass
+		self.typeset('pdfsync')
+		nt.assert_true(os.path.exists(aux))
+	
+	def test_pdfrewritten(self):
+		"""
+		The pdf file is not moved, only rewritten in the same file.
+		"""
+		self.typeset('simple')
+		inode = os.stat('simple.pdf').st_ino
+		self.typeset('simple')
+		new_inode = os.stat('simple.pdf').st_ino
+		nt.assert_equal(inode, new_inode)

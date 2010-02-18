@@ -238,25 +238,31 @@ class Typesetter(object):
 		"""
 		for aux_ext in self.move_exts:
 			aux_name = file_base + os.path.extsep + aux_ext
+			src = os.path.join(self.tmp_dir, aux_name)
+			dest = os.path.join(base,os.curdir)
 			try:
-				dest = os.path.join(base,os.curdir)
-				# we move the pdf in the current directory
+				# move the pdf in the current directory
 				if aux_ext == 'pdf':
 					pdf_name = os.path.join(base, aux_name)
 					if self.move_pdf_to_curdir:
-						dest = os.curdir
+						pdf_path = os.path.join(os.curdir, aux_name)
 						pdf_name = aux_name
 					if self.new_pdf_name:
-						dest = os.path.join(dest,self.new_pdf_name + os.path.extsep + 'pdf')
+						pdf_path = os.path.join(dest,self.new_pdf_name + os.path.extsep + 'pdf')
 						pdf_name = dest
 					# store the pdf name for later use
 					self.current_pdf_name = pdf_name
-				
-				src = os.path.join(self.tmp_dir, aux_name)
-				shutil.move(src, os.path.join(dest, os.path.basename(src)))
-				final_path = os.path.join(dest, aux_name)
-				if os.uname()[0] == 'Darwin': # on Mac OS X we hide all moved files...
-					if aux_ext != 'pdf': # ...except the pdf
+					# write the pdf data in the existing pdf file
+					old_pdf_file = open(pdf_path, 'w')
+					new_pdf_file = open(src, 'r')
+					contents = new_pdf_file.read()
+					old_pdf_file.write(contents)
+					old_pdf_file.close()
+					new_pdf_file.close()
+				else:				
+					final_path = os.path.join(dest, aux_name)
+					shutil.move(src, final_path)
+					if os.uname()[0] == 'Darwin': # on Mac OS X we hide all moved files...
 						if os.system('/Developer/Tools/SetFile -a V %s' % final_path):
 							self.logger.info("Install the Developer Tools if you want the auxiliary files to get invisible")
 
