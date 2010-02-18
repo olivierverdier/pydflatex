@@ -252,14 +252,15 @@ class Typesetter(object):
 					# store the pdf name for later use
 					self.current_pdf_name = pdf_name
 				
-				shutil.move(os.path.join(self.tmp_dir, aux_name), dest)
+				src = os.path.join(self.tmp_dir, aux_name)
+				os.rename(src, os.path.join(dest, os.path.basename(src)))
 				final_path = os.path.join(dest, aux_name)
 				if os.uname()[0] == 'Darwin': # on Mac OS X we hide all moved files...
 					if aux_ext != 'pdf': # ...except the pdf
 						if os.system('/Developer/Tools/SetFile -a V %s' % final_path):
 							self.logger.info("Install the Developer Tools if you want the auxiliary files to get invisible")
 
-			except IOError:
+			except OSError:
 				if aux_ext == 'pdf':
 					message = 'pdf file "%s" not found.' % aux_name
 ## 					self.logger.error('\n\t%s' % message)
