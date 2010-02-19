@@ -314,9 +314,11 @@ class Typesetter(object):
 		for run_nb in range(self.max_run):
 			# run pdflatex
 			self.logger.message("pdflatex run number %d" % (run_nb + 1))
-			command = 'pdflatex -etex -no-mktex=pk %s	-interaction=batchmode --output-directory=%s %s' % (["", "-halt-on-error"][self.halt_on_errors], self.tmp_dir, root)
-			self.logger.debug(command)
-			os.popen(command)
+			arguments = ['pdflatex', '-etex', '-no-mktex=pk', '-interaction=batchmode', ["", "-halt-on-error"][self.halt_on_errors], '--output-directory=%s' % self.tmp_dir, root]
+			self.logger.debug(arguments)
+			import subprocess
+			proc = subprocess.Popen(arguments, stdout=subprocess.PIPE)
+			proc.wait()
 			try:
 				self.parse_log(log_file)
 			except KeyboardInterrupt:
