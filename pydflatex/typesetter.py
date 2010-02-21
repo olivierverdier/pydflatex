@@ -76,7 +76,7 @@ class LaTeXLogger(logging.Logger):
 		Extract the info from the `warning` object.
 		"""
 		msg = warning['text']
-		if msg == 'There were undefined references.':
+		if msg.find('There were') == 0: # for ['There were undefined references.', 'There were multiply-defined labels.']
 			return self.error(msg)
 		head = self.get_page_line(warning)
 		msg = '%s%s' % (head, colored(msg, **self.colours['warning']))

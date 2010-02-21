@@ -132,10 +132,10 @@ class Test_Output(object):
 	
 	def test_twice_label(self):
 		self.typeset('twicelabel')
-		self.assert_contains(colours['warning'],-2)
 		self.assert_contains(colours['warning'],-3)
 		self.assert_contains("Label `label' multiply defined", -3)
 		self.assert_contains("There were multiply-defined labels", -2)
+		self.assert_contains(colours['error'], -2)
 	
 	def test_cite(self):
 		self.typeset('cite')
