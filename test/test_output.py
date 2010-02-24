@@ -68,7 +68,7 @@ class Test_Output(object):
 		if with_binary:
 			self.output = Popen([bin_path, file_name], stderr=PIPE).communicate()[1]
 		try:
-			self.t.run(os.path.join(test_dir, file_name))
+			self.t.run(os.path.join(test_dir, 'latex', file_name))
 		except Exception, e:
 			return e
 		finally:
@@ -92,7 +92,7 @@ class Test_Output(object):
 			
 	def test_simple(self):
 		self.typeset('simple')
-		self.assert_contains('Typesetting %s/simple.tex' % test_dir, 0)
+		self.assert_contains('Typesetting %s/latex/simple.tex' % test_dir, 0)
 		self.assert_contains('Typeset', -1)
 		self.assert_contains(colours['success'])
 	
@@ -105,11 +105,11 @@ class Test_Output(object):
 	def test_non_exist(self):
 		self.typeset('nonexistent')
 		self.assert_contains(colours['error'])
-		self.assert_contains('File %s/nonexistent.tex not found' % test_dir)
+		self.assert_contains('File %s/latex/nonexistent.tex not found' % test_dir)
 	
 	def test_wrong_ext(self):
 		self.typeset('simple.xxx')
-		self.assert_contains('Wrong extension for %s/simple.xxx' % test_dir)
+		self.assert_contains('Wrong extension for %s/latex/simple.xxx' % test_dir)
 		self.assert_contains(colours['error'])
 	
 	def test_trailing_dot(self):
@@ -146,7 +146,7 @@ class Test_Output(object):
 	
 	def test_binary(self):
 		self.typeset('simple', with_binary=True)
-		self.assert_contains('Typesetting %s/simple.tex' % test_dir, 0)
+		self.assert_contains('Typesetting %s/latex/simple.tex' % test_dir, 0)
 	
 	def test_box(self):
 		self.typeset('box')
@@ -162,7 +162,7 @@ class Test_Output(object):
 		"""
 		The auxiliary file pdfsync was moved to the current directory.
 		"""
-		aux = 'pdfsync.pdfsync'
+		aux = os.path.join('latex','pdfsync.pdfsync')
 		try:
 			os.remove(aux)
 		except OSError:
