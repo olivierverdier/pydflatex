@@ -179,3 +179,13 @@ class Test_Output(object):
 		self.typeset('simple')
 		new_inode = os.stat('simple.pdf').st_ino
 		nt.assert_equal(inode, new_inode)
+	
+	def test_no_move_pdf_curdir(self):
+		self.t.move_pdf_to_curdir = False
+		self.typeset('simple')
+		nt.assert_true(os.path.exists(os.path.join('latex', 'simple.pdf')))
+
+	def test_move_pdf_curdir(self):
+		self.t.move_pdf_to_curdir = True # default
+		self.typeset('simple')
+		nt.assert_true(os.path.exists( 'simple.pdf'))

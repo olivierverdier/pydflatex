@@ -244,6 +244,7 @@ class Typesetter(object):
 				# move the pdf in the current directory
 				if aux_ext == 'pdf':
 					pdf_name = os.path.join(base, aux_name)
+					pdf_path = pdf_name
 					if self.move_pdf_to_curdir:
 						pdf_path = os.path.join(os.curdir, aux_name)
 						pdf_name = aux_name
