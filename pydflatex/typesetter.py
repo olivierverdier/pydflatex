@@ -21,10 +21,10 @@ except ImportError:
 		return msg
 
 class LaTeXLogger(logging.Logger):
-	line_template = 'L%-5s'
-	page_template = 'p.%-4s'
-	package_template = '[%s]'
-	head_template = '%s%s%s: '
+	line_template = 'L{0:5}'
+	page_template = 'p.{0:4}'
+	package_template = '[{0}]'
+	head_template = '{package}{page}{line}: '
 	
 	colours = {
 	 	'success': {'color': 'green', 'attrs':['bold']},
@@ -41,8 +41,8 @@ class LaTeXLogger(logging.Logger):
 		"""
 		head = ''
 		if page:
-			head += self.page_template % page
-		self.info(colored('%s: %s' % (head, msg), **self.colours['box']))
+			head += self.page_template.format(page)
+		self.info(colored('{head}: {message}'.format(head=head, message=msg), **self.colours['box']))
 	
 	def warning(self, msg):
 		"""
@@ -58,16 +58,16 @@ class LaTeXLogger(logging.Logger):
 		line = info.get('line','')
 		page = info.get('page','')
 		if line:
-			line_str += self.line_template % line
+			line_str += self.line_template.format(line)
 		page_str = ''
 		if page:
-			page_str += self.page_template % page
+			page_str += self.page_template.format(page)
 		package_str = ''
 		package = info.get('pkg')
 		if package:
-			package_str += self.package_template % package
+			package_str += self.package_template.format(package)
 		if line_str or page_str:
-			return self.head_template % (package_str, page_str, line_str)
+			return self.head_template.format(package=package_str, page=page_str, line=line_str)
 		return ''
 			
 	
@@ -79,7 +79,7 @@ class LaTeXLogger(logging.Logger):
 		if msg.find('There were') == 0: # for ['There were undefined references.', 'There were multiply-defined labels.']
 			return self.error(msg)
 		head = self.get_page_line(warning)
-		msg = '%s%s' % (head, colored(msg, **self.colours['warning']))
+		msg = '{head}{warning}'.format(head=head, warning=colored(msg, **self.colours['warning']))
 		self.warning(msg)
 	
 	def latex_error(self, error):
@@ -107,9 +107,9 @@ class LaTeXLogger(logging.Logger):
 		undefined = ref.get('ref','')
 		citation = ref.get('cite', '')
 		if undefined:
-			self.info("%s'%s' %s" % (head, colored(undefined, **self.colours['ref_warning']), 'undefined'))
+			self.info("{head}'{reference}' {undefined}".format(head=head, reference=colored(undefined, **self.colours['ref_warning']), undefined='undefined'))
 		elif citation:
-			self.info("%s[%s] %s" % (head, colored(citation, **self.colours['ref_warning']), 'undefined'))
+			self.info("{head}[{citation}] {undefined}".format(head=head, citation=colored(citation, **self.colours['ref_warning']), undefined='undefined'))
 		else:
 			self.latex_warning(ref)
 	
@@ -180,7 +180,7 @@ class Typesetter(object):
 			try:
 				os.mkdir(tmp_dir)
 			except OSError:
-				raise IOError('A file named "%s" already exists in this catalog' % tmp_dir)
+				raise IOError('A file named "{0}" already exists in this catalog'.format(tmp_dir))
 		return tmp_dir
 	
 	def rm_tmp_dir(self):
@@ -264,12 +264,12 @@ class Typesetter(object):
 					final_path = os.path.join(dest, aux_name)
 					shutil.move(src, final_path)
 					if os.uname()[0] == 'Darwin': # on Mac OS X we hide all moved files...
-						if os.system('/Developer/Tools/SetFile -a V %s' % final_path):
+						if os.system('/Developer/Tools/SetFile -a V {0}'.format(final_path)):
 							self.logger.info("Install the Developer Tools if you want the auxiliary files to get invisible")
 
 			except IOError:
 				if aux_ext == 'pdf':
-					message = 'pdf file "%s" not found.' % aux_name
+					message = 'pdf file "{0}" not found.'.format(aux_name)
 ## 					self.logger.error('\n\t%s' % message)
 					raise IOError(message)
 
@@ -291,7 +291,7 @@ class Typesetter(object):
 		root, file_ext = os.path.splitext(tex_path)
 		if file_ext[1:]:
 			if file_ext[1:] != 'tex':
-				self.logger.error("Wrong extension for %s" % tex_path)
+				self.logger.error("Wrong extension for {0}".format(tex_path))
 				return
 			else:
 				full_path = tex_path
@@ -300,22 +300,22 @@ class Typesetter(object):
 		
 		# make sure that the file exists
 		if not os.path.exists(full_path):
-			self.logger.error('File %s not found' % full_path)
+			self.logger.error('File {0} not found'.format(full_path))
 			return
 
 
 		# log file
 		log_file = os.path.join(self.tmp_dir, file_base + os.path.extsep + 'log')
 
-		self.logger.info('Typesetting %s\n' % full_path)
+		self.logger.info('Typesetting {0}\n'.format(full_path))
 		
 		# preparing the extra run slot
 		self.extra_run_slot = extra_run
 		
 		for run_nb in range(self.max_run):
 			# run pdflatex
-			self.logger.message("pdflatex run number %d" % (run_nb + 1))
-			arguments = ['pdflatex', '-etex', '-no-mktex=pk', '-interaction=batchmode', ["", "-halt-on-error"][self.halt_on_errors], '--output-directory=%s' % self.tmp_dir, root]
+			self.logger.message("pdflatex run number {0}".format(run_nb + 1))
+			arguments = ['pdflatex', '-etex', '-no-mktex=pk', '-interaction=batchmode', ["", "-halt-on-error"][self.halt_on_errors], '--output-directory={0}'.format(self.tmp_dir), root]
 			self.logger.debug(arguments)
 			import subprocess
 			proc = subprocess.Popen(arguments, stdout=subprocess.PIPE)
@@ -341,7 +341,7 @@ class Typesetter(object):
 						break
 
 		time_end = time.time()
-		self.logger.success('Typesetting of "%s" completed in %ds.' % (full_path, int(time_end - time_start)))
+		self.logger.success('Typesetting of "{name}" completed in {time}s.'.format(name=full_path, time=int(time_end - time_start)))
 		if self.open_pdf:
-			self.logger.info('Opening "%s"...' % self.current_pdf_name)
-			os.system('/usr/bin/open "%s"' % self.current_pdf_name)
+			self.logger.info('Opening "{0}"...'.format(self.current_pdf_name))
+			os.system('/usr/bin/open "{0}"'.format(self.current_pdf_name))

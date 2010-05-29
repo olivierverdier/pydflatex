@@ -21,3 +21,9 @@ It will not run ``bibtex`` or ``makeidx`` for you, but it is easy enough to writ
 	from pydflatex import Typesetter
 	t = Typesetter()
 	t.typeset_file(texfilename)
+
+Requirements
+************
+
+- Python v.2.6 (because of the new string formatting)
+- ``termcolor`` (optional but strongly advised): to display results in colour
