@@ -162,7 +162,7 @@ class Test_Output(object):
 		"""
 		The auxiliary file pdfsync was moved to the current directory.
 		"""
-		aux = os.path.join('latex','pdfsync.pdfsync')
+		aux = os.path.join(test_dir, 'latex','pdfsync.pdfsync')
 		try:
 			os.remove(aux)
 		except OSError:
@@ -183,9 +183,9 @@ class Test_Output(object):
 	def test_no_move_pdf_curdir(self):
 		self.t.move_pdf_to_curdir = False
 		self.typeset('simple')
-		nt.assert_true(os.path.exists(os.path.join('latex', 'simple.pdf')))
+		nt.assert_true(os.path.exists(os.path.join(test_dir, 'latex', 'simple.pdf')))
 
 	def test_move_pdf_curdir(self):
 		self.t.move_pdf_to_curdir = True # default
 		self.typeset('simple')
-		nt.assert_true(os.path.exists( 'simple.pdf'))
+		nt.assert_true(os.path.exists('simple.pdf'))
