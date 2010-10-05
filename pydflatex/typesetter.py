@@ -83,9 +83,9 @@ class LaTeXLogger(logging.Logger):
 		self.warning(msg)
 	
 	def latex_error(self, error):
-		self.error("%s:%s: %s" % (error['file'], error.get('line',''), error['text']))
+		logging.Logger.error(self, "{file}:{line}: {error}".format(file=error['file'], line=error.get('line',''), error=colored(error['text'], **self.colours['error'])))
 		if error.get('code'): # if the code is available we print it:
-			self.error("%4s:\t %s" % (error.get('line',''), error['code']))
+			self.message("{line}:\t {code}".format(line=self.line_template.format(error.get('line','')), code=error['code']))
 
 	def error(self, msg):
 		"""

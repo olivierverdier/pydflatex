@@ -99,8 +99,7 @@ class Test_Output(object):
 	def test_error(self):
 		e = self.typeset('error')
 		nt.assert_true(isinstance(e,IOError))
-		self.assert_contains(r'3: Undefined control sequence \nonexistingmacro.')
-		self.assert_contains(colours['error'])
+		self.assert_contains(r'%sUndefined control sequence \nonexistingmacro.' % colours['error'])
 	
 	def test_non_exist(self):
 		self.typeset('nonexistent')
