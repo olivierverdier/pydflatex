@@ -127,6 +127,7 @@ class Test_Output(object):
 		self.typeset('rerun')
 		self.assert_contains('Rerun')
 		self.assert_contains('pdflatex run number 2')
+		self.assert_contains('\n%sLabel' % colours['warning'])
 		self.assert_success
 	
 	def test_twice_label(self):

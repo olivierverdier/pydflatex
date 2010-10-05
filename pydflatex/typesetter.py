@@ -77,6 +77,8 @@ class LaTeXLogger(logging.Logger):
 		msg = warning['text']
 		if msg.find('There were') == 0: # for ['There were undefined references.', 'There were multiply-defined labels.']
 			return self.error(msg)
+		if msg.find('Rerun to get cross-references right.'):
+			return self.warning(colored(msg,**self.colours['warning']))
 		head = self.get_page_line(warning)
 		msg = '{head}{warning}'.format(head=head, warning=colored(msg, **self.colours['warning']))
 		self.warning(msg)
