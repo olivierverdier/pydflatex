@@ -53,18 +53,12 @@ class LaTeXLogger(logging.Logger):
 		"""
 		Extract the page and line information and formats it.
 		"""
-		line_str = ''
 		line = info.get('line','')
 		page = info.get('page','')
-		if line:
-			line_str += self.line_template.format(line)
-		page_str = ''
-		if page:
-			page_str += self.page_template.format(page)
-		package_str = ''
-		package = info.get('pkg')
-		if package:
-			package_str += self.package_template.format(package)
+		line_str = self.line_template.format(line)
+		page_str = self.page_template.format(str(page).strip())
+		package = info.get('pkg','')
+		package_str = self.package_template.format(package) and package
 		if line_str or page_str:
 			return self.head_template.format(package=package_str, page=page_str, line=line_str)
 		return ''
