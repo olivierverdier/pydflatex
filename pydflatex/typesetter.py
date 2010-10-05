@@ -35,14 +35,13 @@ class LaTeXLogger(logging.Logger):
 		'info': {'attrs': ['bold']}
 		}
 	
-	def box(self, page, msg):
+	def box_warning(self, info):
 		"""
 		Box (over/underfull) warnings.
 		"""
-		head = ''
-		if page:
-			head += self.page_template.format(page)
-		self.info(colored('{head}: {message}'.format(head=head, message=msg), **self.colours['box']))
+		head = self.get_page_line(info)
+		msg = info['text']
+		self.info('{head}{message}'.format(head=head, message=colored(msg, **self.colours['box'])))
 	
 	def warning(self, msg):
 		"""
@@ -221,7 +220,7 @@ class Typesetter(object):
 			if has_occ != -1:
 				box['text'] = box['text'][:has_occ]
 			if not self.suppress_box_warning:
-				self.logger.box(box.get('page'), box['text'])
+				self.logger.box_warning(box)
 		for ref in parser.get_references():
 			self.logger.ref_warning(ref)
 		for warning in parser.get_warnings():

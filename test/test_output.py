@@ -149,8 +149,7 @@ class Test_Output(object):
 	
 	def test_box(self):
 		self.typeset('box')
-		self.assert_contains('Overfull')
-		self.assert_contains(colours['box'])
+		self.assert_contains('%sOverfull' % colours['box'])
 	
 	def test_nobox(self):
 		self.t.suppress_box_warning = True
