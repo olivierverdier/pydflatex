@@ -46,6 +46,6 @@ try:
 	typesetter.run(args)
 except Exception, e:
 	import sys
-	typesetter.logger.error('Exception occurred %s("%s")' % (type(e).__name__, e))
+	typesetter.logger.error('%s: %s' % (type(e).__name__, e))
 	sys.exit(1)
 

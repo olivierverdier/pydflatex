@@ -127,7 +127,11 @@ handler.setLevel(logging.INFO)
 
 stderr_logger.addHandler(handler)
 
-	
+class LaTeXError(Exception):
+	"""
+	LaTeX Error
+	"""
+
 class Typesetter(object):
 	def __init__(self, **options):
 		# storing the options
@@ -224,8 +228,11 @@ class Typesetter(object):
 			if warning.get('pkg') == 'hyperref' and warning['text'].find('Token') != -1:
 				continue # I hate those hyperref warning
 			self.logger.latex_warning(warning)
-		for error in parser.get_errors():
-			self.logger.latex_error(error)
+		errors = list(parser.get_errors())
+		if errors:
+			for error in errors:
+				self.logger.latex_error(error)
+			raise LaTeXError(errors[0].get('text'))
 	
 	def move_auxiliary(self, base, file_base):
 		"""
