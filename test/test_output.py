@@ -94,6 +94,7 @@ class Test_Output(object):
 		self.typeset('simple')
 		self.assert_contains('Typesetting %s/latex/simple.tex' % test_dir, 0)
 		self.assert_contains('Typeset', -1)
+		self.assert_contains('This is pdfTeX', regexp=True)
 		self.assert_contains(colours['success'])
 	
 	def test_error(self):

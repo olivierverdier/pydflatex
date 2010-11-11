@@ -320,8 +320,8 @@ class Typesetter(object):
 			arguments = ['pdflatex', '-etex', '-no-mktex=pk', '-interaction=batchmode', ["", "-halt-on-error"][self.halt_on_errors], '--output-directory={0}'.format(self.tmp_dir), root]
 			self.logger.debug(arguments)
 			import subprocess
-			proc = subprocess.Popen(arguments, stdout=subprocess.PIPE)
-			proc.wait()
+			output = subprocess.Popen(arguments, stdout=subprocess.PIPE).communicate()[0]
+			self.logger.message(output.splitlines()[0])
 			try:
 				self.parse_log(log_file)
 			except KeyboardInterrupt:
