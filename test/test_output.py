@@ -24,7 +24,7 @@ import nose.tools as nt
 
 
 from pydflatex import Typesetter
-from pydflatex.typesetter import LaTeXLogger
+from pydflatex.typesetter import LaTeXLogger, LaTeXError
 
 try:
 	import termcolor
@@ -98,7 +98,7 @@ class Test_Output(object):
 	
 	def test_error(self):
 		e = self.typeset('error')
-		nt.assert_true(isinstance(e,IOError))
+		nt.assert_true(isinstance(e,LaTeXError))
 		self.assert_contains(r'%sUndefined control sequence \nonexistingmacro.' % colours['error'])
 	
 	def test_non_exist(self):
