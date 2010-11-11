@@ -48,6 +48,7 @@ class Test_Output(object):
 	def tearDown(self):
 		self.t.logger.removeHandler(self.handler)
 		self.logfile.close()
+		self.t.rm_tmp_dir()
 		try:
 			pdf_name = self.t.current_pdf_name
 		except AttributeError:
