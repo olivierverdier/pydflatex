@@ -116,16 +116,17 @@ class LaTeXLogger(logging.Logger):
 	
 
 
-stderr_logger = LaTeXLogger('pydflatex')
-stderr_logger.setLevel(logging.DEBUG)
+latex_logger = LaTeXLogger('pydflatex')
+latex_logger.setLevel(logging.DEBUG)
 
-handler = logging.StreamHandler()
-handler.setLevel(logging.INFO)
+std_handler = logging.StreamHandler()
+std_handler.setLevel(logging.INFO)
+
+debug_handler = logging.StreamHandler()
+debug_handler.setLevel(logging.DEBUG)
 
 ## formatter = logging.Formatter('%(message)s')
 ## handler.setFormatter(formatter)
-
-stderr_logger.addHandler(handler)
 
 class LaTeXError(Exception):
 	"""
@@ -141,11 +142,15 @@ class Typesetter(object):
 		from pydflatex.latexlogparser import LogCheck
 		self.parser = LogCheck()
 		self.tmp_dir = self.create_tmp_dir()
+		self.logger = latex_logger
+		if not self.debug:
+			self.logger.addHandler(std_handler)
+		else:
+			self.logger.addHandler(debug_handler)
+		self.logger.debug(options)
 
 	# maximum number of pdflatex runs
 	max_run = 5
-	
-	logger = stderr_logger
 	
 	tmp_dir_name = '.latex_tmp'
 	
@@ -156,6 +161,8 @@ class Typesetter(object):
 	clean_up = False
 	
 	extra_run = False
+	
+	debug = False
 	
 	# whereas the pdf file produced will be pulled back in the current directory
 	move_pdf_to_curdir = True

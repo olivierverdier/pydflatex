@@ -24,7 +24,7 @@ def add_option(parser, *args, **kwargs):
 	kwargs['default'] = getattr(Typesetter, kwargs['dest'])
 	parser.add_option(*args, **kwargs)
 
-add_option(parser, '-d', '--display', dest='open_pdf', help='view the pdf file(s) in an editor.', action='store_true')
+add_option(parser, '-p', '--pdf', dest='open_pdf', help='view the pdf file(s) in an editor.', action='store_true')
 
 add_option(parser, '-k', '--continue', help='continue on error', dest='halt_on_errors', action='store_false')
 
@@ -37,6 +37,8 @@ add_option(parser, '-c', '--clean-up', help='clean up auxiliary files', dest='cl
 add_option(parser, '-x', '--extra-run', help='run pdflatex one extra time', dest='extra_run', action='store_true')
 
 add_option(parser, '-w', '--warning-suppress', help='suppress some warnings', dest='suppress_box_warning', action='store_true')
+
+add_option(parser, '-v', '--verbose', dest='debug', help='Verbose output for debugging', action='store_true')
 
 (options,args) = parser.parse_args()
 
