@@ -232,7 +232,7 @@ class Typesetter(object):
 		if errors:
 			for error in errors:
 				self.logger.latex_error(error)
-			raise LaTeXError(errors[0].get('text'))
+			return errors[0]
 	
 	def move_auxiliary(self, base, file_base):
 		"""
@@ -242,38 +242,41 @@ class Typesetter(object):
 			aux_name = file_base + os.path.extsep + aux_ext
 			src = os.path.join(self.tmp_dir, aux_name)
 			dest = os.path.join(base,os.curdir)
-			try:
-				# move the pdf in the current directory
-				if aux_ext == 'pdf':
-					pdf_name = os.path.join(base, aux_name)
-					pdf_path = pdf_name
-					if self.move_pdf_to_curdir:
-						pdf_path = os.path.join(os.curdir, aux_name)
-						pdf_name = aux_name
-					if self.new_pdf_name:
-						pdf_path = os.path.join(dest,self.new_pdf_name + os.path.extsep + 'pdf')
-						pdf_name = dest
-					# store the pdf name for later use
-					self.current_pdf_name = pdf_name
-					# write the pdf data in the existing pdf file
-					old_pdf_file = open(pdf_path, 'w')
+			# move the pdf in the current directory
+			if aux_ext == 'pdf':
+				pdf_name = os.path.join(base, aux_name)
+				pdf_path = pdf_name
+				if self.move_pdf_to_curdir:
+					pdf_path = os.path.join(os.curdir, aux_name)
+					pdf_name = aux_name
+				if self.new_pdf_name:
+					pdf_path = os.path.join(dest,self.new_pdf_name + os.path.extsep + 'pdf')
+					pdf_name = dest
+				# store the pdf name for later use
+				self.current_pdf_name = pdf_name
+				# write the pdf data in the existing pdf file
+				old_pdf_file = open(pdf_path, 'w')
+				try:
 					new_pdf_file = open(src, 'r')
-					contents = new_pdf_file.read()
-					old_pdf_file.write(contents)
-					old_pdf_file.close()
-					new_pdf_file.close()
-				else:				
-					final_path = os.path.join(dest, aux_name)
+				except IOError:
+					message = 'pdf file "{0}" not found.'.format(aux_name)
+## 					self.logger.error('\n\t%s' % message)
+					raise IOError(message)
+				contents = new_pdf_file.read()
+				old_pdf_file.write(contents)
+				old_pdf_file.close()
+				new_pdf_file.close()
+			else:
+				final_path = os.path.join(dest, aux_name)
+				try:
 					shutil.move(src, final_path)
+				except IOError:
+					pass
+				else:
 					if os.uname()[0] == 'Darwin': # on Mac OS X we hide all moved files...
 						if os.system('/Developer/Tools/SetFile -a V {0}'.format(final_path)):
 							self.logger.info("Install the Developer Tools if you want the auxiliary files to get invisible")
 
-			except IOError:
-				if aux_ext == 'pdf':
-					message = 'pdf file "{0}" not found.'.format(aux_name)
-## 					self.logger.error('\n\t%s' % message)
-					raise IOError(message)
 
 
 	def typeset_file(self, tex_path, extra_run=None):
@@ -317,30 +320,39 @@ class Typesetter(object):
 		for run_nb in range(self.max_run):
 			# run pdflatex
 			self.logger.message("pdflatex run number {0}".format(run_nb + 1))
-			arguments = ['pdflatex', '-etex', '-no-mktex=pk', '-interaction=batchmode', ["", "-halt-on-error"][self.halt_on_errors], '--output-directory={0}'.format(self.tmp_dir), root]
+			arguments = ['pdflatex', '-etex',
+				'-no-mktex=pk',
+				'-interaction=batchmode',
+				'-output-directory={0}'.format(self.tmp_dir), root
+				]
+			if self.halt_on_errors:
+				arguments.insert(-1, '-halt-on-error')
 			self.logger.debug(arguments)
 			import subprocess
 			output = subprocess.Popen(arguments, stdout=subprocess.PIPE).communicate()[0]
 			self.logger.message(output.splitlines()[0])
 			try:
-				self.parse_log(log_file)
+				error = self.parse_log(log_file)
 			except KeyboardInterrupt:
 				self.logger.error("Keyboard Interruption")
 				import sys
 				sys.exit()
 			except IOError: # if the file is invalid or doesn't exist
 				self.logger.error("Log file not found")
+				raise
 			except ValueError:
 				self.logger.error("Wrong format of the log file")
-				break # stop processing this file
+				raise # stop processing this file
 			else:
+				if error and self.halt_on_errors:
+					raise LaTeXError(error.get('text'))
 				self.move_auxiliary(base,file_base)
-				# we stop on errors or if no other run is needed
-				if not self.parser.run_needed() or self.parser.errors():
-					if self.extra_run_slot > 0: # run some more times
-						self.extra_run_slot -= 1
-					else:
-						break
+			# we stop if no other run is needed
+			if not self.parser.run_needed():
+				if self.extra_run_slot > 0: # run some more times
+					self.extra_run_slot -= 1
+				else:
+					break
 
 		time_end = time.time()
 		self.logger.success('Typesetting of "{name}" completed in {time}s.'.format(name=full_path, time=int(time_end - time_start)))

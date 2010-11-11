@@ -181,12 +181,29 @@ class Test_Output(object):
 		new_inode = os.stat('simple.pdf').st_ino
 		nt.assert_equal(inode, new_inode)
 	
+	def exists(self, file_name):
+		return os.path.exists(os.path.join(test_dir, 'latex', file_name))
+
 	def test_no_move_pdf_curdir(self):
 		self.t.move_pdf_to_curdir = False
 		self.typeset('simple')
-		nt.assert_true(os.path.exists(os.path.join(test_dir, 'latex', 'simple.pdf')))
+		nt.assert_true(self.exists('simple.pdf'))
 
 	def test_move_pdf_curdir(self):
 		self.t.move_pdf_to_curdir = True # default
 		self.typeset('simple')
 		nt.assert_true(os.path.exists('simple.pdf'))
+
+	def test_halt_on_error(self):
+		self.t.halt_on_errors = True
+		self.t.move_pdf_to_curdir = False
+		self.typeset('continue')
+		nt.assert_false(self.exists('continue.pdf'))
+
+	def test_continue(self):
+		self.t.halt_on_errors = False
+		self.t.move_pdf_to_curdir = False
+		self.typeset('continue')
+		print os.path.exists('./.latex_tmp/continue.pdf')
+		print os.path.exists('./latex/continue.pdf')
+		nt.assert_true(self.exists('continue.pdf'))
