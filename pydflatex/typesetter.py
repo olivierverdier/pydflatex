@@ -362,7 +362,7 @@ class Typesetter(object):
 					break
 
 		time_end = time.time()
-		self.logger.success('Typesetting of "{name}" completed in {time}s.'.format(name=full_path, time=int(time_end - time_start)))
+		self.logger.success('Typesetting of "{name}" completed in {time:.1f}s.'.format(name=full_path, time=(time_end - time_start)))
 		if self.open_pdf:
 			self.logger.info('Opening "{0}"...'.format(self.current_pdf_name))
 			os.system('/usr/bin/open "{0}"'.format(self.current_pdf_name))
