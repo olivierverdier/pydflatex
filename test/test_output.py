@@ -82,7 +82,7 @@ class Test_Output(object):
 		if not regexp:
 			does_match = out.find(match) != -1
 		else:
-			does_match = re.search(match, self.output)
+			does_match = re.search(match, self.output, re.MULTILINE)
 		if not does_match:
 			raise AssertionError("'%s' not in\n%s" % (match, out))
 	
