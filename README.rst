@@ -1,6 +1,19 @@
 ``pydflatex``: a simple build system for LaTeX
 ================================================
 
+Usage
+*******
+
+::
+
+    pydflatex file.tex
+
+Some useful options:
+
+ :`-p`: opens the pdf in a pdf viewer
+ :`-k`: keeps compiling on error
+ :`-w`: suppress the box warnings
+
 Features
 *******************
 
