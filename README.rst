@@ -11,7 +11,8 @@ The most interesting features are:
 - running LaTeX as many times as necessary
 - hiding the auxilliary files in a hidden sub-folder (defaults to ``.tmp_latex``)
 - suppressing the logorrheic output of LaTeX and giving a coloured, short summary of the warnings and errors instead.
-- some extra features on Mac OS X, as opening the pdf in you editor of choice, or hiding the remaining auxilliary files (``.pdfsync`` files)
+- opening the pdf in you editor of choice
+- on Mac OS X, hiding the ``.pdfsync`` file
 
 .. image:: http://files.droplr.com/files/35740123/Lp66.pydflatex.png
 	:alt: Example
