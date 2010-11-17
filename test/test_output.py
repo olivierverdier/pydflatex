@@ -93,7 +93,7 @@ class Test_Output(object):
 			
 	def test_simple(self):
 		self.typeset('simple')
-		self.assert_contains('Typesetting %s/latex/simple.tex' % test_dir, 0)
+		self.assert_contains('[1] pdflatex %s/latex/simple.tex' % test_dir, 0)
 		self.assert_contains('Typeset', -1)
 		self.assert_contains('This is pdfTeX', regexp=True)
 		self.assert_contains(colours['success'])
@@ -128,7 +128,7 @@ class Test_Output(object):
 	def test_rerun(self):
 		self.typeset('rerun')
 		self.assert_contains('Rerun')
-		self.assert_contains('pdflatex run number 2')
+		self.assert_contains('[2] pdflatex ')
 		self.assert_contains('\n%sLabel' % colours['warning'])
 		self.assert_success
 	
@@ -148,7 +148,7 @@ class Test_Output(object):
 	
 	def test_binary(self):
 		self.typeset('simple', with_binary=True)
-		self.assert_contains('Typesetting %s/latex/simple.tex' % test_dir, 0)
+		self.assert_contains('[1] pdflatex %s/latex/simple.tex' % test_dir, 0)
 	
 	def test_box(self):
 		self.typeset('box')

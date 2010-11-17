@@ -319,14 +319,12 @@ class Typesetter(object):
 		# log file
 		log_file = os.path.join(self.tmp_dir, file_base + os.path.extsep + 'log')
 
-		self.logger.info('Typesetting {0}\n'.format(full_path))
-		
 		# preparing the extra run slot
 		self.extra_run_slot = extra_run
 		
 		for run_nb in range(self.max_run):
 			# run pdflatex
-			self.logger.message("pdflatex run number {0}".format(run_nb + 1))
+			self.logger.message("[{number}] pdflatex {file}".format(file=full_path, number=run_nb + 1))
 			arguments = ['pdflatex', '-etex',
 				'-no-mktex=pk',
 				'-interaction=batchmode',
