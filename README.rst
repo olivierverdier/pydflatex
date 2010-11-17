@@ -13,7 +13,7 @@ The most interesting features are:
 - suppressing the logorrheic output of LaTeX and giving a coloured, short summary of the warnings and errors instead.
 - some extra features on Mac OS X, as opening the pdf in you editor of choice, or hiding the remaining auxilliary files (``.pdfsync`` files)
 
-.. image:: http://files.droplr.com/files/35740123/MmK0.Picture%2031.png
+.. image:: http://files.droplr.com/files/35740123/Lp66.pydflatex.png
 	:alt: Example
 
 
