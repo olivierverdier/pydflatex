@@ -40,6 +40,8 @@ add_option(parser, '-w', '--warning-suppress', help='suppress some warnings', de
 
 add_option(parser, '-v', '--verbose', dest='debug', help='Verbose output for debugging', action='store_true')
 
+add_option(parser, '-s', '--no-style', dest='colour', help='No coloured output', action='store_false')
+
 (options,args) = parser.parse_args()
 
 

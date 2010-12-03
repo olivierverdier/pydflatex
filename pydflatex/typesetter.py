@@ -12,13 +12,6 @@ import shutil
 
 
 import logging
-try:
-	from termcolor import colored
-except ImportError:
-	import warnings
-	warnings.warn('termcolor was not found: in black and white it will be')
-	def colored(msg, *args, **kwargs):
-		return msg
 
 class LaTeXLogger(logging.Logger):
 	line_template = 'L{0:5}'
@@ -26,14 +19,8 @@ class LaTeXLogger(logging.Logger):
 	package_template = '[{0}]'
 	head_template = '{package}{page}{line}: '
 	
-	colours = {
-	 	'success': {'color': 'green', 'attrs':['bold']},
-		'error' : {'color': 'red', 'attrs': ['bold']},
-		'ref_warning' : {'color': 'red', 'attrs':['bold']},
-		'warning' : {'color': 'magenta'},
-		'box' : {'color': 'cyan'},
-		'info': {'attrs': ['bold']}
-		}
+	def styled(self, msg, style):
+		return msg
 	
 	def box_warning(self, info):
 		"""
@@ -41,7 +28,7 @@ class LaTeXLogger(logging.Logger):
 		"""
 		head = self.get_page_line(info)
 		msg = info['text']
-		self.info('{head}{message}'.format(head=head, message=colored(msg, **self.colours['box'])))
+		self.info('{head}{message}'.format(head=head, message=self.styled(msg,'box')))
 	
 	def warning(self, msg):
 		"""
@@ -72,13 +59,13 @@ class LaTeXLogger(logging.Logger):
 		if msg.find('There were') == 0: # for ['There were undefined references.', 'There were multiply-defined labels.']
 			return self.error(msg)
 		if msg.find('Rerun to get cross-references right.'):
-			return self.warning(colored(msg,**self.colours['warning']))
+			return self.warning(self.styled(msg,'warning'))
 		head = self.get_page_line(warning)
-		msg = '{head}{warning}'.format(head=head, warning=colored(msg, **self.colours['warning']))
+		msg = '{head}{warning}'.format(head=head, warning=self.styled(msg,'warning'))
 		self.warning(msg)
 	
 	def latex_error(self, error):
-		logging.Logger.error(self, "{file}:{line}: {error}".format(file=error['file'], line=error.get('line',''), error=colored(error['text'], **self.colours['error'])))
+		logging.Logger.error(self, "{file}:{line}: {error}".format(file=error['file'], line=error.get('line',''), error=self.styled(error['text'],'error')))
 		if error.get('code'): # if the code is available we print it:
 			self.message("{line}:\t {code}".format(line=self.line_template.format(error.get('line','')), code=error['code']))
 
@@ -86,13 +73,13 @@ class LaTeXLogger(logging.Logger):
 		"""
 		Error (coloured)
 		"""
-		logging.Logger.error(self, colored(msg, **self.colours['error']))
+		logging.Logger.error(self, self.styled(msg,'error'))
 	
 	def success(self, msg):
 		"""
 		Success (coloured)
 		"""
-		self.info(colored(msg, **self.colours['success']))
+		self.info(self.styled(msg,'success'))
 	
 	def ref_warning(self, ref):
 		"""
@@ -102,9 +89,9 @@ class LaTeXLogger(logging.Logger):
 		undefined = ref.get('ref','')
 		citation = ref.get('cite', '')
 		if undefined:
-			self.info("{head}'{reference}' {undefined}".format(head=head, reference=colored(undefined, **self.colours['ref_warning']), undefined='undefined'))
+			self.info("{head}'{reference}' {undefined}".format(head=head, reference=self.styled(undefined,'ref_warning'), undefined='undefined'))
 		elif citation:
-			self.info("{head}[{citation}] {undefined}".format(head=head, citation=colored(citation, **self.colours['ref_warning']), undefined='undefined'))
+			self.info("{head}[{citation}] {undefined}".format(head=head, citation=self.styled(citation,'ref_warning'), undefined='undefined'))
 		else:
 			self.latex_warning(ref)
 	
@@ -112,9 +99,30 @@ class LaTeXLogger(logging.Logger):
 		"""
 		Messages in bold
 		"""
-		self.info(colored(msg, **self.colours['info']))
+		self.info(self.styled(msg,'info'))
 	
+class LaTeXLoggerColour(LaTeXLogger):
+	"""
+	Logger using ascii colour escape codes (suitable for terminal)
+	"""
+	colours = {
+		'success': {'color': 'green', 'attrs':['bold']},
+		'error' : {'color': 'red', 'attrs': ['bold']},
+		'ref_warning' : {'color': 'red', 'attrs':['bold']},
+		'warning' : {'color': 'magenta'},
+		'box' : {'color': 'cyan'},
+		'info': {'attrs': ['bold']}
+		}
 
+	def styled(self, msg, colour):
+		return colored(msg, **self.colours[colour])
+
+try:
+	from termcolor import colored
+except ImportError:
+	import warnings
+	warnings.warn('termcolor was not found: in black and white it will be')
+	LaTeXLoggerColour = LaTeXLogger
 
 latex_logger = LaTeXLogger('pydflatex')
 latex_logger.setLevel(logging.DEBUG)
@@ -142,12 +150,24 @@ class Typesetter(object):
 		from pydflatex.latexlogparser import LogCheck
 		self.parser = LogCheck()
 		self.tmp_dir = self.create_tmp_dir()
-		self.logger = latex_logger
-		if not self.debug:
-			self.logger.addHandler(std_handler)
-		else:
-			self.logger.addHandler(debug_handler)
+		# setting up the logger
+		self.setup_logger()
 		self.logger.debug(options)
+
+	def setup_logger(self, handlers=None):
+		if self.colour:
+			LoggerClass = LaTeXLoggerColour
+		else:
+			LoggerClass = LaTeXLogger
+		self.logger = LoggerClass('pydflatex')
+		if not handlers:
+			if not self.debug:
+				self.logger.addHandler(std_handler)
+			else:
+				self.logger.addHandler(debug_handler)
+		else:
+			for handler in handlers:
+				self.logger.addHandler(handler)
 
 	# maximum number of pdflatex runs
 	max_run = 5
@@ -163,6 +183,8 @@ class Typesetter(object):
 	extra_run = False
 	
 	debug = False
+
+	colour = True
 	
 	# whereas the pdf file produced will be pulled back in the current directory
 	move_pdf_to_curdir = True

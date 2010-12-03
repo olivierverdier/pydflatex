@@ -24,26 +24,27 @@ import nose.tools as nt
 
 
 from pydflatex import Typesetter
-from pydflatex.typesetter import LaTeXLogger, LaTeXError
+from pydflatex.typesetter import LaTeXLogger, LaTeXLoggerColour, LaTeXError
 
 try:
 	import termcolor
 except ImportError:
-	colours = dict([(key, '') for key in LaTeXLogger.colours])
+	colours = dict([(key, '') for key in LaTeXLoggerColour.colours])
 else:
-	colours = dict([(key,termcolor.colored('', **colargs)[:-4]) for key, colargs in LaTeXLogger.colours.items()])
+	colours = dict([(key,termcolor.colored('', **colargs)[:-4]) for key, colargs in LaTeXLoggerColour.colours.items()])
 
 class Test_Output(object):
 	
 	def setUp(self):
 		self.t = Typesetter()
 		self.t.clean_up_tmp_dir()
-		self.logfile = tempfile.NamedTemporaryFile()
+		self.setup_logger()
+
+	def setup_logger(self):
 		import logging
+		self.logfile = tempfile.NamedTemporaryFile()
 		self.handler = logging.FileHandler(self.logfile.name)
-		logger = LaTeXLogger('log')
-		logger.addHandler(self.handler)
-		self.t.logger = logger
+		self.t.setup_logger([self.handler])
 		
 	def tearDown(self):
 		self.t.logger.removeHandler(self.handler)
@@ -208,3 +209,10 @@ class Test_Output(object):
 		print os.path.exists('./.latex_tmp/continue.pdf')
 		print os.path.exists('./latex/continue.pdf')
 		nt.assert_true(self.exists('continue.pdf'))
+
+	def test_nostyle(self):
+		self.t.colour = False
+		self.setup_logger()
+		self.typeset('simple')
+		self.assert_contains('^Typesetting', regexp=True)
+
