@@ -18,10 +18,10 @@ class LaTeXLogger(logging.Logger):
 	page_template = 'p.{0:4}'
 	package_template = '[{0}]'
 	head_template = '{package}{page}{line}: '
-	
+
 	def styled(self, msg, style):
 		return msg
-	
+
 	def box_warning(self, info):
 		"""
 		Box (over/underfull) warnings.
@@ -29,13 +29,13 @@ class LaTeXLogger(logging.Logger):
 		head = self.get_page_line(info)
 		msg = info['text']
 		self.info('{head}{message}'.format(head=head, message=self.styled(msg,'box')))
-	
+
 	def warning(self, msg):
 		"""
 		LaTeX warning
 		"""
 		logging.Logger.warning(self, msg)
-	
+
 	def get_page_line(self, info):
 		"""
 		Extract the page and line information and formats it.
@@ -49,8 +49,8 @@ class LaTeXLogger(logging.Logger):
 		if line_str or page_str:
 			return self.head_template.format(package=package_str, page=page_str, line=line_str)
 		return ''
-			
-	
+
+
 	def latex_warning(self, warning):
 		"""
 		Extract the info from the `warning` object.
@@ -63,7 +63,7 @@ class LaTeXLogger(logging.Logger):
 		head = self.get_page_line(warning)
 		msg = '{head}{warning}'.format(head=head, warning=self.styled(msg,'warning'))
 		self.warning(msg)
-	
+
 	def latex_error(self, error):
 		logging.Logger.error(self, "{file}:{line}: {error}".format(file=error['file'], line=error.get('line',''), error=self.styled(error['text'],'error')))
 		if error.get('code'): # if the code is available we print it:
@@ -74,13 +74,13 @@ class LaTeXLogger(logging.Logger):
 		Error (coloured)
 		"""
 		logging.Logger.error(self, self.styled(msg,'error'))
-	
+
 	def success(self, msg):
 		"""
 		Success (coloured)
 		"""
 		self.info(self.styled(msg,'success'))
-	
+
 	def ref_warning(self, ref):
 		"""
 		Special format for citation and reference warnings.
@@ -94,13 +94,13 @@ class LaTeXLogger(logging.Logger):
 			self.info("{head}[{citation}] {undefined}".format(head=head, citation=self.styled(citation,'ref_warning'), undefined='undefined'))
 		else:
 			self.latex_warning(ref)
-	
+
 	def message(self, msg):
 		"""
 		Messages in bold
 		"""
 		self.info(self.styled(msg,'info'))
-	
+
 class LaTeXLoggerColour(LaTeXLogger):
 	"""
 	Logger using ascii colour escape codes (suitable for terminal)
@@ -171,33 +171,33 @@ class Typesetter(object):
 
 	# maximum number of pdflatex runs
 	max_run = 5
-	
+
 	tmp_dir_name = '.latex_tmp'
-	
+
 	halt_on_errors = True
-	
+
 	open_pdf = False
-	
+
 	clean_up = False
-	
+
 	extra_run = False
-	
+
 	debug = False
 
 	colour = True
-	
+
 	# whereas the pdf file produced will be pulled back in the current directory
 	move_pdf_to_curdir = True
-	
+
 	new_pdf_name = ''
-	
+
 	suppress_box_warning = False
 
 	# extensions of the files that will be "pulled back" to the directory where the file is
 	# on Mac OS X those files will be set invisible
-	move_exts = ['pdfsync','pdf']
+	move_exts = ['pdfsync','aux','pdf']
 
-	
+
 	def create_tmp_dir(self, base=os.path.curdir):
 		"""
 		Create the temporary directory if it doesn't exist
@@ -210,13 +210,13 @@ class Typesetter(object):
 			except OSError:
 				raise IOError('A file named "{0}" already exists in this catalog'.format(tmp_dir))
 		return tmp_dir
-	
+
 	def rm_tmp_dir(self):
 		"""
 		Remove the temporary dir. Useful for testing purposes.
 		"""
 		shutil.rmtree(self.tmp_dir)
-	
+
 	def clean_up_tmp_dir(self):
 		"""
 		Cleans up the tmp dir, i.e., deletes it and create a new pristine one.
@@ -224,7 +224,7 @@ class Typesetter(object):
 		self.rm_tmp_dir()
 		self.create_tmp_dir()
 
-	
+
 	def run(self, file_paths):
 		"""
 		Compile several files at once
@@ -237,7 +237,7 @@ class Typesetter(object):
 			file_paths = [file_paths]
 		for tex_path in file_paths:
 			self.typeset_file(tex_path)
-	
+
 	def parse_log(self, log_file):
 		"""
 		Read the log file and print out the gist of it.
@@ -262,7 +262,7 @@ class Typesetter(object):
 			for error in errors:
 				self.logger.latex_error(error)
 			return errors[0]
-	
+
 	def move_auxiliary(self, base, file_base):
 		"""
 		Move some auxiliary files back to the tex directory
@@ -331,7 +331,7 @@ class Typesetter(object):
 				full_path = tex_path
 		else:
 			full_path = root + os.path.extsep + 'tex'
-		
+
 		# make sure that the file exists
 		if not os.path.exists(full_path):
 			self.logger.error('File {0} not found'.format(full_path))
@@ -343,7 +343,7 @@ class Typesetter(object):
 
 		# preparing the extra run slot
 		self.extra_run_slot = extra_run
-		
+
 		for run_nb in range(self.max_run):
 			# run pdflatex
 			self.logger.message("[{number}] pdflatex {file}".format(file=full_path, number=run_nb + 1))
