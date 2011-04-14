@@ -127,6 +127,10 @@ class Test_Output(object):
 		self.assert_contains(colours['error'], -2)
 
 	def test_rerun(self):
+		try:
+			os.remove(os.path.join(test_dir, 'latex','rerun.aux'))
+		except OSError:
+			pass
 		self.typeset('rerun')
 		self.assert_contains('Rerun')
 		self.assert_contains('[2] pdflatex ')
