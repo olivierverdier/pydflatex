@@ -195,7 +195,7 @@ class Typesetter(object):
 
 	# extensions of the files that will be "pulled back" to the directory where the file is
 	# on Mac OS X those files will be set invisible
-	move_exts = ['pdfsync','aux','pdf']
+	move_exts = ['pdfsync','aux','idx','pdf']
 
 
 	def create_tmp_dir(self, base=os.path.curdir):
