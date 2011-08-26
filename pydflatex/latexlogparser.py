@@ -44,16 +44,15 @@ class LogCheck (object):
 		exist.
 		"""
 		self.lines = None
-		file = open(name)
-		line = file.readline()
-		if not line:
-			file.close()
-			raise ValueError("Empty file")
-		if not re_loghead.match(line):
-			file.close()
-			raise ValueError("This doesn't seem to be a tex log file")
-		self.lines = file.readlines()
-		file.close()
+		with open(name) as file:
+			line = file.readline()
+			if not line:
+				file.close()
+				raise ValueError("Empty file")
+			if not re_loghead.match(line):
+				file.close()
+				raise ValueError("This doesn't seem to be a tex log file")
+			self.lines = file.readlines()
 
 	#-- Process information {{{2
 
