@@ -28,13 +28,9 @@ add_option(parser, '-p', '--pdf', dest='open_pdf', help='view the pdf file(s) in
 
 add_option(parser, '-k', '--continue', help='continue on error', dest='halt_on_errors', action='store_false')
 
-add_option(parser, '-t', '--tmp-folder', help='hidden folder for auxiliary files', dest='tmp_dir_name', action='store')
-
 #parser.add_option('-r', '--rename', help='rename the output pdf file', dest='name', action='store', default=None)
 
 add_option(parser, '-c', '--clean-up', help='clean up auxiliary files', dest='clean_up', action='store_true')
-
-add_option(parser, '-x', '--extra-run', help='run pdflatex one extra time', dest='extra_run', action='store_true')
 
 add_option(parser, '-w', '--warning-suppress', help='suppress some warnings', dest='suppress_box_warning', action='store_true')
 

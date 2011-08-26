@@ -21,8 +21,6 @@ Features
 
 The most interesting features are:
 
-- running LaTeX as many times as necessary
-- hiding the auxilliary files in a hidden sub-folder (defaults to ``.tmp_latex``)
 - suppressing the logorrheic output of LaTeX and giving a coloured, short summary of the warnings and errors instead.
 - opening the pdf in you editor of choice
 - on Mac OS X, hiding the ``.pdfsync`` file

@@ -156,7 +156,6 @@ class Typesetter(object):
 		# loading the log parser
 		from pydflatex.latexlogparser import LogCheck
 		self.parser = LogCheck()
-		self.tmp_dir = self.create_tmp_dir()
 		# setting up the logger
 		self.setup_logger()
 		self.logger.debug(options)
@@ -176,18 +175,13 @@ class Typesetter(object):
 			for handler in handlers:
 				self.logger.addHandler(handler)
 
-	# maximum number of pdflatex runs
-	max_run = 5
 
-	tmp_dir_name = '.latex_tmp'
 
 	halt_on_errors = True
 
 	open_pdf = False
 
 	clean_up = False
-
-	extra_run = False
 
 	debug = False
 
@@ -205,40 +199,11 @@ class Typesetter(object):
 	move_exts = ['pdfsync','aux','idx','pdf']
 
 
-	def create_tmp_dir(self, base=os.path.curdir):
-		"""
-		Create the temporary directory if it doesn't exist
-		return the tmp_dir
-		"""
-		tmp_dir = os.path.join(base, self.tmp_dir_name)
-		if not os.path.isdir(tmp_dir):
-			try:
-				os.mkdir(tmp_dir)
-			except OSError:
-				raise IOError('A file named "{0}" already exists in this catalog'.format(tmp_dir))
-		return tmp_dir
-
-	def rm_tmp_dir(self):
-		"""
-		Remove the temporary dir. Useful for testing purposes.
-		"""
-		shutil.rmtree(self.tmp_dir)
-
-	def clean_up_tmp_dir(self):
-		"""
-		Cleans up the tmp dir, i.e., deletes it and create a new pristine one.
-		"""
-		self.rm_tmp_dir()
-		self.create_tmp_dir()
-
 
 	def run(self, file_paths):
 		"""
 		Compile several files at once
 		"""
-		# clean up first if needed
-		if self.clean_up:
-			self.clean_up_tmp_dir()
 		# easier to write with one file
 		if not isinstance(file_paths, (list, tuple)):
 			file_paths = [file_paths]
@@ -272,7 +237,130 @@ class Typesetter(object):
 				self.logger.latex_error(error)
 			return errors[0]
 
-	def move_auxiliary(self, base, file_base):
+
+	def log_file_path(self, base, file_base):
+		return os.path.join(base, file_base + os.path.extsep + 'log')
+
+	def arguments(self):
+		args = ['pdflatex', '-etex',
+				'-no-mktex=pk',
+				'-interaction=batchmode',
+				'-recorder',
+				]
+		if self.halt_on_errors:
+			args.insert(-1, '-halt-on-error')
+		return args
+
+	def typeset_file(self, tex_path, ):
+		"""
+		Typeset one given file.
+		"""
+		import time
+		time_start = time.time()
+		# find out the directory where the file is
+		base,file_name = os.path.split(tex_path)
+		file_base, file_ext = os.path.splitext(file_name)
+		# setup the TEXINPUTS variable
+		os.environ['TEXINPUTS'] = base + ':'
+		# find out the name of the file to compile
+		root, file_ext = os.path.splitext(tex_path)
+		if file_ext[1:]:
+			if file_ext[1:] != 'tex':
+				self.logger.error("Wrong extension for {0}".format(tex_path))
+				return
+			else:
+				full_path = tex_path
+		else:
+			full_path = root + os.path.extsep + 'tex'
+
+		# make sure that the file exists
+		if not os.path.exists(full_path):
+			self.logger.error('File {0} not found'.format(full_path))
+			return
+
+
+		# log file
+		log_file = self.log_file_path(base,file_base)
+
+		# run pdflatex
+		self.logger.message("pdflatex {file}".format(file=full_path, ))
+		arguments = self.arguments()
+		# append file name
+		arguments.append(root)
+		self.logger.debug(arguments)
+		import subprocess
+		output = subprocess.Popen(arguments, stdout=subprocess.PIPE).communicate()[0]
+		self.logger.message(output.splitlines()[0])
+		try:
+			error = self.parse_log(log_file)
+		except KeyboardInterrupt:
+			self.logger.error("Keyboard Interruption")
+			import sys
+			sys.exit()
+		except IOError: # if the file is invalid or doesn't exist
+			self.logger.error("Log file not found")
+			raise
+		except ValueError:
+			self.logger.error("Wrong format of the log file")
+			raise # stop processing this file
+		else:
+			if error and self.halt_on_errors:
+				raise LaTeXError(error.get('text'))
+			self.post_typeset(base, file_base)
+
+		time_end = time.time()
+		self.logger.success('Typesetting of "{name}" completed in {time:.1f}s.'.format(name=full_path, time=(time_end - time_start)))
+		if self.open_pdf:
+			self.logger.info('Opening "{0}"...'.format(self.current_pdf_name))
+			os.system('/usr/bin/open "{0}"'.format(self.current_pdf_name))
+
+	def post_typeset(self, base, file_base):
+		self.current_pdf_name = os.path.join(base, file_base + os.path.extsep + 'pdf')
+
+class IsolatedTypesetter(Typesetter):
+
+	def __init__(self, **options):
+		super(IsolatedTypesetter,self).__init__(**options)
+		self.tmp_dir = self.create_tmp_dir()
+
+	tmp_dir_name = '.latex_tmp'
+
+	def create_tmp_dir(self, base=os.path.curdir):
+		"""
+		Create the temporary directory if it doesn't exist
+		return the tmp_dir
+		"""
+		tmp_dir = os.path.join(base, self.tmp_dir_name)
+		if not os.path.isdir(tmp_dir):
+			try:
+				os.mkdir(tmp_dir)
+			except OSError:
+				raise IOError('A file named "{0}" already exists in this catalog'.format(tmp_dir))
+		return tmp_dir
+
+	def rm_tmp_dir(self):
+		"""
+		Remove the temporary dir. Useful for testing purposes.
+		"""
+		shutil.rmtree(self.tmp_dir)
+
+	def clean_up_tmp_dir(self):
+		"""
+		Cleans up the tmp dir, i.e., deletes it and create a new pristine one.
+		"""
+		self.rm_tmp_dir()
+		self.create_tmp_dir()
+
+	def run(self, file_paths):
+		# clean up first if needed
+		if self.clean_up:
+			self.clean_up_tmp_dir()
+		super(IsolatedTypesetter,self).run(file_paths)
+
+	def log_file_path(self, base, file_base):
+		return os.path.join(self.tmp_dir, file_base + os.path.extsep + 'log')
+
+	def post_typeset(self, base, file_base):
 		"""
 		Move some auxiliary files back to the tex directory
 		"""
@@ -315,83 +403,7 @@ class Typesetter(object):
 						if os.system('/Developer/Tools/SetFile -a V {0}'.format(final_path)):
 							self.logger.info("Install the Developer Tools if you want the auxiliary files to get invisible")
 
-
-
-	def typeset_file(self, tex_path, extra_run=None):
-		"""
-		Typeset one given file.
-		"""
-		import time
-		if extra_run is None:
-			extra_run = self.extra_run
-		time_start = time.time()
-		# find out the directory where the file is
-		base,file_name = os.path.split(tex_path)
-		file_base, file_ext = os.path.splitext(file_name)
-		# setup the TEXINPUTS variable
-		os.environ['TEXINPUTS'] = base + ':'
-		# find out the name of the file to compile
-		root, file_ext = os.path.splitext(tex_path)
-		if file_ext[1:]:
-			if file_ext[1:] != 'tex':
-				self.logger.error("Wrong extension for {0}".format(tex_path))
-				return
-			else:
-				full_path = tex_path
-		else:
-			full_path = root + os.path.extsep + 'tex'
-
-		# make sure that the file exists
-		if not os.path.exists(full_path):
-			self.logger.error('File {0} not found'.format(full_path))
-			return
-
-
-		# log file
-		log_file = os.path.join(self.tmp_dir, file_base + os.path.extsep + 'log')
-
-		# preparing the extra run slot
-		self.extra_run_slot = extra_run
-
-		for run_nb in range(self.max_run):
-			# run pdflatex
-			self.logger.message("[{number}] pdflatex {file}".format(file=full_path, number=run_nb + 1))
-			arguments = ['pdflatex', '-etex',
-				'-no-mktex=pk',
-				'-interaction=batchmode',
-				'-output-directory={0}'.format(self.tmp_dir), root
-				]
-			if self.halt_on_errors:
-				arguments.insert(-1, '-halt-on-error')
-			self.logger.debug(arguments)
-			import subprocess
-			output = subprocess.Popen(arguments, stdout=subprocess.PIPE).communicate()[0]
-			self.logger.message(output.splitlines()[0])
-			try:
-				error = self.parse_log(log_file)
-			except KeyboardInterrupt:
-				self.logger.error("Keyboard Interruption")
-				import sys
-				sys.exit()
-			except IOError: # if the file is invalid or doesn't exist
-				self.logger.error("Log file not found")
-				raise
-			except ValueError:
-				self.logger.error("Wrong format of the log file")
-				raise # stop processing this file
-			else:
-				if error and self.halt_on_errors:
-					raise LaTeXError(error.get('text'))
-				self.move_auxiliary(base,file_base)
-			# we stop if no other run is needed
-			if not self.parser.run_needed():
-				if self.extra_run_slot > 0: # run some more times
-					self.extra_run_slot -= 1
-				else:
-					break
-
-		time_end = time.time()
-		self.logger.success('Typesetting of "{name}" completed in {time:.1f}s.'.format(name=full_path, time=(time_end - time_start)))
-		if self.open_pdf:
-			self.logger.info('Opening "{0}"...'.format(self.current_pdf_name))
-			os.system('/usr/bin/open "{0}"'.format(self.current_pdf_name))
+	def arguments(self):
+		args = super(IsolatedTypesetter,self).arguments()
+		args.append('-output-directory={0}'.format(self.tmp_dir))
+		return args
