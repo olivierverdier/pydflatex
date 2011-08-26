@@ -263,6 +263,8 @@ class Typesetter(object):
 			# following should be filtered via the loggers filter!
 			if warning.get('pkg') == 'hyperref' and warning['text'].find('Token') != -1:
 				continue # I hate those hyperref warning
+			if warning.get('text') == r'Command \centerline is TeX.  Use \centering or center environment instead.':
+				continue # warning from the nag package
 			self.logger.latex_warning(warning)
 		errors = list(parser.get_errors())
 		if errors:
