@@ -44,4 +44,4 @@ Requirements
 ************
 
 - Python v.2.6 (because of the new string formatting)
-- ``termcolor`` (optional but strongly advised): to display results in colour
+- ``termstyle`` (optional but strongly advised): to display results in colour
