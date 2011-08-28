@@ -126,6 +126,7 @@ class LaTeXLoggerColour(LaTeXLogger):
 
 try:
 	import termstyle
+	termstyle.auto()
 except ImportError:
 	import warnings
 	warnings.warn('termstyle was not found: in black and white it will be')
