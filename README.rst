@@ -28,10 +28,30 @@ The most interesting features are:
 	:alt: Example
 
 
-Limitations
-***********************
+Compiling Large Documents
+**************************
 
-It will not run ``bibtex`` or ``makeidx`` for you, but it is easy enough to write a simple python script that calls the typesetter and does precisely what you need in your project. One way to achieve that would be::
+``Pydflatex`` is only a shell around the ``pdflatex``, but you can use it along with ``scons`` in order to compile large documents.
+In order to do this, create a ``Sconstruct`` file which contains this code::
+
+
+	#!/usr/bin/env python
+
+	import os
+	env = Environment(ENV=os.environ)
+	env['PDFLATEX'] = 'pydflatex'
+	env['PDFLATEXFLAGS'] = '-wk'
+	pdf = env.PDF(target='main.pdf', source='main.tex')
+	env.Precious(pdf)
+
+SCons will now use pydflatex to compile your document.
+This will automatically take care of the index, bibliography, recompiling if an included file is modified, etc.
+
+Using as a Library
+******************
+
+It is easy to write a simple python script that calls the typesetter and does precisely what you need in your project.
+One way to achieve that would be::
 
 	from pydflatex import Typesetter
 	t = Typesetter()
