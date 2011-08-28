@@ -17,13 +17,12 @@ Some useful options:
 Features
 *******************
 
-``pydflatex`` is another tool to help compiling LaTeX files.
+``pydflatex`` is a wrapper around ``pdflatex`` which produces a short, readable, coloured output.
 
 The most interesting features are:
 
-- suppressing the logorrheic output of LaTeX and giving a coloured, short summary of the warnings and errors instead.
+- suppressing the logorrhoeic output of LaTeX and giving a coloured, short summary of the warnings and errors instead.
 - opening the pdf in you editor of choice
-- on Mac OS X, hiding the ``.pdfsync`` file
 
 .. image:: http://files.droplr.com/files/35740123/Lp66.pydflatex.png
 	:alt: Example
