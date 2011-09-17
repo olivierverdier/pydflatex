@@ -193,7 +193,7 @@ class Typesetter(object):
 
 	new_pdf_name = ''
 
-	suppress_box_warning = False
+	suppress_box_warning = True
 
 	# extensions of the files that will be "pulled back" to the directory where the file is
 	# on Mac OS X those files will be set invisible

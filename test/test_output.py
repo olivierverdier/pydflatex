@@ -160,12 +160,12 @@ class Test_Output(object):
 		self.assert_contains('pdflatex %s/latex/simple.tex' % test_dir, 0)
 
 	def test_box(self):
+		self.t.suppress_box_warning = False
 		self.typeset('box')
 		self.assert_contains('%sOverfull' % colours['box'])
 		self.assert_contains('p.1')
 
 	def test_nobox(self):
-		self.t.suppress_box_warning = True
 		self.typeset('box')
 		nt.assert_equal(self.output.find('Overfull'), -1)
 

@@ -12,7 +12,7 @@ Some useful options:
 
  :`-p`: opens the pdf in a pdf viewer
  :`-k`: keeps compiling on error
- :`-w`: suppress the box warnings
+ :`-w`: show the box warnings
 
 Features
 *******************
