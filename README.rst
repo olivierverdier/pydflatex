@@ -10,8 +10,8 @@ Usage
 
 Some useful options:
 
- :`-p`: opens the pdf in a pdf viewer
- :`-k`: keeps compiling on error
+ :`-p`: open the pdf in a pdf viewer
+ :`-k`: keep compiling on error
  :`-w`: show the box warnings
 
 Features
@@ -22,7 +22,7 @@ Features
 The most interesting features are:
 
 - suppressing the logorrhoeic output of LaTeX and giving a coloured, short summary of the warnings and errors instead.
-- opening the pdf in you editor of choice
+- opening the pdf in your editor of choice
 
 .. image:: https://github.com/olivierverdier/pydflatex/raw/master/screenshot.png
 	:alt: Screenshot
