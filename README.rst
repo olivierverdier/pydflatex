@@ -24,8 +24,8 @@ The most interesting features are:
 - suppressing the logorrhoeic output of LaTeX and giving a coloured, short summary of the warnings and errors instead.
 - opening the pdf in you editor of choice
 
-.. image:: http://files.droplr.com/files/35740123/Lp66.pydflatex.png
-	:alt: Example
+.. image:: https://github.com/olivierverdier/pydflatex/raw/master/screenshot.png
+	:alt: Screenshot
 
 
 Compiling Large Documents
