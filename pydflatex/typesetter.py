@@ -9,7 +9,7 @@ A wrapper around pdflatex to allow:
 
 import os
 import shutil
-
+import datetime
 
 import logging
 
@@ -284,7 +284,8 @@ class Typesetter(object):
 		log_file = self.log_file_path(base,file_base)
 
 		# run pdflatex
-		self.logger.message("pdflatex {file}".format(file=full_path, ))
+		now = datetime.datetime.now().strftime('%Y-%m-%d %H.%M.%S')
+		self.logger.message("\t[{now}] pdflatex {file}".format(file=full_path, now=now))
 		arguments = self.arguments()
 		# append file name
 		arguments.append(root)
