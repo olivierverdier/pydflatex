@@ -151,7 +151,8 @@ class LaTeXError(Exception):
 	"""
 
 class Typesetter(object):
-	def __init__(self, **options):
+	def __init__(self, tex_path=None, **options):
+		self.tex_path = tex_path
 		# storing the options
 		for k, v in options.items():
 			self.__setattr__(k,v)
@@ -202,15 +203,11 @@ class Typesetter(object):
 
 
 
-	def run(self, file_paths):
+	def run(self):
 		"""
-		Compile several files at once
+		Compile the current tex file.
 		"""
-		# easier to write with one file
-		if not isinstance(file_paths, (list, tuple)):
-			file_paths = [file_paths]
-		for tex_path in file_paths:
-			self.typeset_file(tex_path)
+		self.typeset_file(self.tex_path)
 
 	def parse_log(self, log_file):
 		"""
@@ -377,11 +374,11 @@ class IsolatedTypesetter(Typesetter):
 		self.rm_tmp_dir()
 		self.create_tmp_dir()
 
-	def run(self, file_paths):
+	def run(self):
 		# clean up first if needed
 		if self.clean_up:
 			self.clean_up_tmp_dir()
-		super(IsolatedTypesetter,self).run(file_paths)
+		super(IsolatedTypesetter,self).run()
 
 	def log_file_path(self, base, file_base):
 		return os.path.join(self.tmp_dir, file_base + os.path.extsep + 'log')

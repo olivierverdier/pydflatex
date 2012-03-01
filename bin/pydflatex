@@ -14,15 +14,15 @@ from pydflatex import Typesetter
 
 
 #setting up the command options
-from optparse import OptionParser
-usage = 'usage: %prog [options] texfile1 [texfile2]...'
-description = '''Compile tex files with pdflatex and store the auxiliary files in a subfolder.
+from argparse import ArgumentParser
+usage = 'usage: %(prog)s [options] texfile1'
+description = '''Compile a tex file with pdflatex and make the auxiliary files invisible.
 Note that the '.tex' extension may be omitted'''
-parser = OptionParser(usage=usage, description=description)
+parser = ArgumentParser(usage=usage, description=description)
 
 def add_option(parser, *args, **kwargs):
 	kwargs['default'] = getattr(Typesetter, kwargs['dest'])
-	parser.add_option(*args, **kwargs)
+	parser.add_argument(*args, **kwargs)
 
 add_option(parser, '-p', '--pdf', dest='open_pdf', help='view the pdf file(s) in an editor.', action='store_true')
 
@@ -38,12 +38,14 @@ add_option(parser, '-v', '--verbose', dest='debug', help='Verbose output for deb
 
 add_option(parser, '-s', '--no-style', dest='colour', help='No coloured output', action='store_false')
 
-(options,args) = parser.parse_args()
+parser.add_argument('tex_path', type=str, metavar='tex path', help='path to tex file')
+
+args = parser.parse_args()
 
 
-typesetter = Typesetter(**options.__dict__)
+typesetter = Typesetter(**args.__dict__)
 try:
-	typesetter.run(args)
+	typesetter.run()
 except Exception, e:
 	import sys
 	typesetter.logger.error('%s: %s' % (type(e).__name__, e))

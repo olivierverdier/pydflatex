@@ -49,7 +49,8 @@ class Harness(object):
 			self.output = Popen([bin_path, tex_path], stderr=PIPE).communicate()[1]
 		else:
 			try:
-				self.t.run(tex_path)
+				self.t.tex_path = os.path.join(test_dir, 'latex', file_name)
+				self.t.run()
 			finally:
 				self.output = self.logfile.read()
 

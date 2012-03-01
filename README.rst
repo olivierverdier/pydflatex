@@ -54,8 +54,8 @@ It is easy to write a simple python script that calls the typesetter and does pr
 One way to achieve that would be::
 
 	from pydflatex import Typesetter
-	t = Typesetter()
-	t.typeset_file(texfilename)
+	t = Typesetter(texfilename)
+	t.typeset_file()
 
 Requirements
 ************
