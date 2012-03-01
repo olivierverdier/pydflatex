@@ -34,18 +34,44 @@ except ImportError:
 else:
 	colours = dict([(key,termcolor.colored('', **colargs)[:-4]) for key, colargs in LaTeXLoggerColour.colours.items()])
 
-class Test_Output(object):
+class Harness(object):
 
-	def setUp(self):
-		self.t = IsolatedTypesetter()
-		self.t.clean_up_tmp_dir()
-		self.setup_logger()
 
 	def setup_logger(self):
 		import logging
 		self.logfile = tempfile.NamedTemporaryFile()
 		self.handler = logging.FileHandler(self.logfile.name)
 		self.t.setup_logger([self.handler])
+
+	def typeset(self, file_name, with_binary=False):
+		if with_binary:
+			self.output = Popen([bin_path, file_name], stderr=PIPE).communicate()[1]
+		try:
+			self.t.run(os.path.join(test_dir, 'latex', file_name))
+		finally:
+			self.output = self.logfile.read()
+
+	def assert_contains(self, match, line=None, regexp=False):
+		out = self.output
+		if line is not None:
+			out = out.splitlines()[line]
+		if not regexp:
+			does_match = out.find(match) != -1
+		else:
+			does_match = re.search(match, self.output, re.MULTILINE)
+		if not does_match:
+			raise AssertionError("'%s' not in\n%s" % (match, out))
+
+	def assert_success(self):
+		self.assert_contains('Typesetting of')
+		self.assert_contains('completed')
+		self.assert_contains(colours['success'])
+
+class Test_IsolatedOutput(Harness):
+	def setUp(self):
+		self.t = IsolatedTypesetter()
+		self.t.clean_up_tmp_dir()
+		self.setup_logger()
 
 	def tearDown(self):
 		self.t.logger.removeHandler(self.handler)
@@ -67,31 +93,6 @@ class Test_Output(object):
 ## 		f.write(content)
 ## 		return f
 ## 	
-	def typeset(self, file_name, with_binary=False):
-		if with_binary:
-			self.output = Popen([bin_path, file_name], stderr=PIPE).communicate()[1]
-		try:
-			self.t.run(os.path.join(test_dir, 'latex', file_name))
-		except Exception as e:
-			raise e
-		finally:
-			self.output = self.logfile.read()
-
-	def assert_contains(self, match, line=None, regexp=False):
-		out = self.output
-		if line is not None:
-			out = out.splitlines()[line]
-		if not regexp:
-			does_match = out.find(match) != -1
-		else:
-			does_match = re.search(match, self.output, re.MULTILINE)
-		if not does_match:
-			raise AssertionError("'%s' not in\n%s" % (match, out))
-
-	def assert_success(self):
-		self.assert_contains('Typesetting of')
-		self.assert_contains('completed')
-		self.assert_contains(colours['success'])
 
 	def test_simple(self):
 		self.typeset('simple')
@@ -226,4 +227,24 @@ class Test_Output(object):
 		self.setup_logger()
 		self.typeset('simple')
 		self.assert_contains('^Typesetting', regexp=True)
+
+class Test_Output(Harness):
+	def setUp(self):
+		self.t = Typesetter()
+		self.setup_logger()
+
+	def test_invisible(self):
+		self.typeset('simple')
+		fls = self.t.fls_file('simple')
+		for aux in self.t.output_files('simple'):
+			output = Popen(['/Developer/Tools/GetFileInfo', '-av', aux], stdout=PIPE).communicate()[0].rstrip()
+			if os.path.splitext(aux)[-1] != '.pdf':
+				print aux, output
+				## nt.assert_equal(output, '1')
+
+	def test_output_files(self):
+		self.typeset('simple')
+		expected = ['./simple.fls', 'simple.log', 'simple.aux', 'simple.pdf']
+		computed = list(self.t.output_files('simple'))
+		nt.assert_list_equal(computed, expected)
 

@@ -316,8 +316,32 @@ class Typesetter(object):
 			self.logger.info('Opening "{0}"...'.format(self.current_pdf_name))
 			os.system('/usr/bin/open "{0}"'.format(self.current_pdf_name))
 
+	def make_invisible(self, base, aux_file):
+		cmd = ['/Developer/Tools/SetFile','-a','V']
+		full_path = os.path.join(base,aux_file)
+		try:
+			output,error = subprocess.Popen(cmd + [full_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+		except OSError, e:
+			self.logger.info("{0}\nInstall the Developer Tools if you want the auxiliary files to get invisible".format(e))
+
+	def fls_file(self, file_base):
+		return os.path.join(os.curdir,file_base+os.path.extsep+'fls')
+
+	def output_files(self, file_base):
+		fls_file = self.fls_file(file_base)
+		yield fls_file
+		with open(fls_file) as lines:
+			for line in lines:
+				if line[:6] == 'OUTPUT':
+					aux_file = line[7:].rstrip()
+					yield aux_file
+
+
 	def post_typeset(self, base, file_base):
 		self.current_pdf_name = os.path.join(base, file_base + os.path.extsep + 'pdf')
+		for aux_file in self.output_files(file_base):
+			if os.path.splitext(aux_file)[1] != '.pdf':
+				self.make_invisible(base, aux_file)
 
 class IsolatedTypesetter(Typesetter):
 

@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+
+import os
+env = Environment(ENV=os.environ)
+env['PDFLATEX'] = 'pydflatex'
+env['PDFLATEXFLAGS'] = '-k'
+pdf = env.PDF(target='rerun.pdf', source='rerun.tex')
+env.Precious(pdf)
