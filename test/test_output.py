@@ -44,12 +44,14 @@ class Harness(object):
 		self.t.setup_logger([self.handler])
 
 	def typeset(self, file_name, with_binary=False):
+		tex_path = os.path.join(test_dir, 'latex', file_name)
 		if with_binary:
-			self.output = Popen([bin_path, file_name], stderr=PIPE).communicate()[1]
-		try:
-			self.t.run(os.path.join(test_dir, 'latex', file_name))
-		finally:
-			self.output = self.logfile.read()
+			self.output = Popen([bin_path, tex_path], stderr=PIPE).communicate()[1]
+		else:
+			try:
+				self.t.run(tex_path)
+			finally:
+				self.output = self.logfile.read()
 
 	def assert_contains(self, match, line=None, regexp=False):
 		out = self.output
