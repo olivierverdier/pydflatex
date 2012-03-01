@@ -12,6 +12,7 @@ import shutil
 import datetime
 
 import logging
+import subprocess
 
 class LaTeXLogger(logging.Logger):
 	line_template = 'L{0:5}'
@@ -290,7 +291,6 @@ class Typesetter(object):
 		# append file name
 		arguments.append(root)
 		self.logger.debug(arguments)
-		import subprocess
 		output = subprocess.Popen(arguments, stdout=subprocess.PIPE).communicate()[0]
 		self.logger.message(output.splitlines()[0])
 		try:
