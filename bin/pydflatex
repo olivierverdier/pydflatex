@@ -38,6 +38,8 @@ add_option(parser, '-v', '--verbose', dest='debug', help='Verbose output for deb
 
 add_option(parser, '-s', '--no-style', dest='colour', help='No coloured output', action='store_false')
 
+add_option(parser, '-x', '--xetex', dest='xetex', help='Use XeLaTeX engine', action='store_true')
+
 parser.add_argument('tex_path', type=str, metavar='tex path', help='path to tex file')
 
 args = parser.parse_args()

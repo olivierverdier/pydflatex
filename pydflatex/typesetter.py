@@ -197,6 +197,8 @@ class Typesetter(object):
 
 	suppress_box_warning = True
 
+	xetex = False
+
 	# extensions of the files that will be "pulled back" to the directory where the file is
 	# on Mac OS X those files will be set invisible
 	move_exts = ['pdfsync','aux','idx','pdf']
@@ -208,6 +210,9 @@ class Typesetter(object):
 		Compile the current tex file.
 		"""
 		self.typeset_file(self.tex_path)
+
+	def engine(self):
+		return ['pdflatex','xelatex'][self.xetex]
 
 	def parse_log(self, log_file):
 		"""
@@ -241,7 +246,7 @@ class Typesetter(object):
 		return os.path.join(base, file_base + os.path.extsep + 'log')
 
 	def arguments(self):
-		args = ['pdflatex', '-etex',
+		args = [self.engine(), '-etex',
 				'-no-mktex=pk',
 				'-interaction=batchmode',
 				'-recorder',

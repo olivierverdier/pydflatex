@@ -231,6 +231,12 @@ class Test_IsolatedOutput(Harness):
 		self.typeset('simple')
 		self.assert_contains('^Typesetting', regexp=True)
 
+	def test_xetex(self):
+		self.t.xetex = True
+		self.setup_logger()
+		self.typeset('simple')
+		self.assert_contains('XeTeX')
+
 class Test_Output(Harness):
 	def setUp(self):
 		self.t = Typesetter()
