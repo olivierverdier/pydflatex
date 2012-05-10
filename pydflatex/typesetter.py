@@ -246,7 +246,7 @@ class Typesetter(object):
 		return os.path.join(base, file_base + os.path.extsep + 'log')
 
 	def arguments(self):
-		args = [self.engine(), '-etex',
+		args = [self.engine(),
 				'-no-mktex=pk',
 				'-interaction=batchmode',
 				'-recorder',
