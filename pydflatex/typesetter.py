@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# (c) Olivier Verdier <olivier.verdier@gmail.com>, 2007-2010
+# (c) Olivier Verdier <olivier.verdier@gmail.com>, 2007-2012
 """
 A wrapper around pdflatex to allow:
 - hiding of the temporary files in various ways
