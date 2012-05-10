@@ -288,7 +288,7 @@ class Typesetter(object):
 
 		# run pdflatex
 		now = datetime.datetime.now().strftime('%Y-%m-%d %H.%M.%S')
-		self.logger.message("\t[{now}] pdflatex {file}".format(file=full_path, now=now))
+		self.logger.message("\t[{now}] {engine} {file}".format(engine=self.engine(), file=full_path, now=now))
 		arguments = self.arguments()
 		# append file name
 		arguments.append(root)
