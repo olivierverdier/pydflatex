@@ -24,7 +24,7 @@ def add_option(parser, *args, **kwargs):
 	kwargs['default'] = getattr(Typesetter, kwargs['dest'])
 	parser.add_argument(*args, **kwargs)
 
-add_option(parser, '-p', '--pdf', dest='open_pdf', help='view the pdf file(s) in an editor.', action='store_true')
+add_option(parser, '-o', '--open', dest='open_pdf', help='view the pdf file(s) in a pdf viewer.', action='store_true')
 
 add_option(parser, '-k', '--continue', help='continue on error', dest='halt_on_errors', action='store_false')
 
@@ -36,7 +36,7 @@ add_option(parser, '-w', '--with-warning', help='do not suppress common warnings
 
 add_option(parser, '-v', '--verbose', dest='debug', help='Verbose output for debugging', action='store_true')
 
-add_option(parser, '-s', '--no-style', dest='colour', help='No coloured output', action='store_false')
+add_option(parser, '-p', '--plain', dest='colour', help='No coloured output', action='store_false')
 
 add_option(parser, '-x', '--xetex', dest='xetex', help='Use XeLaTeX engine', action='store_true')
 

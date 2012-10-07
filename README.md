@@ -9,8 +9,8 @@ pydflatex file.tex
 
 Some useful options:
 
-* `-p`: open the pdf in a pdf viewer
-*  `-k`: keep compiling on error
+* `-o`: open the pdf in a pdf viewer
+* `-k`: keep compiling on error
 * `-w`: show the box warnings
 
 ## Features
