@@ -25,14 +25,14 @@ import re
 
 
 from pydflatex import Typesetter, IsolatedTypesetter
-from pydflatex.typesetter import LaTeXLogger, LaTeXLoggerColour, LaTeXError
+from pydflatex.typesetter import LaTeXLoggerColour, LaTeXError
 
 try:
 	import termcolor
 except ImportError:
 	colours = dict([(key, '') for key in LaTeXLoggerColour.colours])
 else:
-	colours = dict([(key,termcolor.colored('', **colargs)[:-4]) for key, colargs in LaTeXLoggerColour.colours.items()])
+	colours = dict([(key, termcolor.colored('', **colargs)[:-4]) for key, colargs in LaTeXLoggerColour.colours.items()])
 
 class Harness(unittest.TestCase):
 
@@ -143,11 +143,11 @@ class Test_IsolatedOutput(Harness):
 		self.assert_contains('Rerun')
 		self.assert_contains('[2] pdflatex ')
 		self.assert_contains('\n%sLabel' % colours['warning'])
-		self.assert_success
+		self.assert_success()
 
 	def test_twice_label(self):
 		self.typeset('twicelabel')
-		self.assert_contains(colours['warning'],-3)
+		self.assert_contains(colours['warning'], -3)
 		self.assert_contains("Label `label' multiply defined", -3)
 		self.assert_contains("There were multiply-defined labels", -2)
 		self.assert_contains(colours['error'], -2)
@@ -195,7 +195,8 @@ class Test_IsolatedOutput(Harness):
 		new_inode = os.stat('simple.pdf').st_ino
 		self.assertEqual(inode, new_inode)
 
-	def exists(self, file_name):
+	@classmethod
+	def exists(cls, file_name):
 		return os.path.exists(os.path.join(test_dir, 'latex', file_name))
 
 	def test_no_move_pdf_curdir(self):
@@ -244,7 +245,6 @@ class Test_Output(Harness):
 
 	def test_invisible(self):
 		self.typeset('simple')
-		fls = self.t.fls_file('simple')
 		for aux in self.t.output_files('simple'):
 			output = Popen(['/Developer/Tools/GetFileInfo', '-av', aux], stdout=PIPE).communicate()[0].rstrip()
 			if os.path.splitext(aux)[-1] != '.pdf':
