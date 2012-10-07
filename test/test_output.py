@@ -1,12 +1,13 @@
 # -*- coding: UTF-8 -*-
 from __future__ import division
 
+import unittest
+
 import os
 test_dir = os.path.dirname(__file__)
 tmp_dir = os.path.join(test_dir, '.tmp')
 
 import tempfile
-from nose.plugins.skip import SkipTest
 
 
 bin_path = os.path.join(test_dir, os.path.pardir, 'bin', 'pydflatex')
@@ -20,7 +21,6 @@ from subprocess import Popen, PIPE
 
 import re
 
-import nose.tools as nt
 
 
 
@@ -34,7 +34,7 @@ except ImportError:
 else:
 	colours = dict([(key,termcolor.colored('', **colargs)[:-4]) for key, colargs in LaTeXLoggerColour.colours.items()])
 
-class Harness(object):
+class Harness(unittest.TestCase):
 
 
 	def setup_logger(self):
@@ -133,8 +133,8 @@ class Test_IsolatedOutput(Harness):
 ## 		self.assert_contains(ref_warning, -4)
 		self.assert_contains(colours['error'], -2)
 
+	@unittest.skip('Rerun is broken')
 	def test_rerun(self):
-		raise SkipTest('Rerun is broken')
 		try:
 			os.remove(os.path.join(test_dir, 'latex','rerun.aux'))
 		except OSError:
@@ -171,7 +171,7 @@ class Test_IsolatedOutput(Harness):
 
 	def test_nobox(self):
 		self.typeset('box')
-		nt.assert_equal(self.output.find('Overfull'), -1)
+		self.assertEqual(self.output.find('Overfull'), -1)
 
 	def test_pdfsync(self):
 		"""
@@ -183,7 +183,7 @@ class Test_IsolatedOutput(Harness):
 		except OSError:
 			pass
 		self.typeset('pdfsync')
-		nt.assert_true(os.path.exists(aux))
+		self.assertTrue(os.path.exists(aux))
 
 	def test_pdfrewritten(self):
 		"""
@@ -193,7 +193,7 @@ class Test_IsolatedOutput(Harness):
 		inode = os.stat('simple.pdf').st_ino
 		self.typeset('simple')
 		new_inode = os.stat('simple.pdf').st_ino
-		nt.assert_equal(inode, new_inode)
+		self.assertEqual(inode, new_inode)
 
 	def exists(self, file_name):
 		return os.path.exists(os.path.join(test_dir, 'latex', file_name))
@@ -201,12 +201,12 @@ class Test_IsolatedOutput(Harness):
 	def test_no_move_pdf_curdir(self):
 		self.t.move_pdf_to_curdir = False
 		self.typeset('simple')
-		nt.assert_true(self.exists('simple.pdf'))
+		self.assertTrue(self.exists('simple.pdf'))
 
 	def test_move_pdf_curdir(self):
 		self.t.move_pdf_to_curdir = True # default
 		self.typeset('simple')
-		nt.assert_true(os.path.exists('simple.pdf'))
+		self.assertTrue(os.path.exists('simple.pdf'))
 
 	def test_halt_on_error(self):
 		self.t.halt_on_errors = True
@@ -215,7 +215,7 @@ class Test_IsolatedOutput(Harness):
 			self.typeset('continue')
 		except LaTeXError:
 			pass
-		nt.assert_false(self.exists('continue.pdf'))
+		self.assertFalse(self.exists('continue.pdf'))
 
 	def test_continue(self):
 		self.t.halt_on_errors = False
@@ -223,7 +223,7 @@ class Test_IsolatedOutput(Harness):
 		self.typeset('continue')
 		print os.path.exists('./.latex_tmp/continue.pdf')
 		print os.path.exists('./latex/continue.pdf')
-		nt.assert_true(self.exists('continue.pdf'))
+		self.assertTrue(self.exists('continue.pdf'))
 
 	def test_nostyle(self):
 		self.t.colour = False
@@ -249,11 +249,11 @@ class Test_Output(Harness):
 			output = Popen(['/Developer/Tools/GetFileInfo', '-av', aux], stdout=PIPE).communicate()[0].rstrip()
 			if os.path.splitext(aux)[-1] != '.pdf':
 				print aux, output
-				## nt.assert_equal(output, '1')
+				## self.assertEqual(output, '1')
 
 	def test_output_files(self):
 		self.typeset('simple')
 		expected = ['./simple.fls', 'simple.log', 'simple.aux', 'simple.pdf']
 		computed = list(self.t.output_files('simple'))
-		nt.assert_list_equal(computed, expected)
+		self.assertEqual(computed, expected)
 
