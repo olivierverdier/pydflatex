@@ -319,12 +319,10 @@ class Typesetter(object):
 			os.system('/usr/bin/open "{0}"'.format(self.current_pdf_name))
 
 	def make_invisible(self, base, aux_file):
-		cmd = ['SetFile', '-a', 'V']
-		full_path = os.path.join(base,aux_file)
-		try:
-			output,error = subprocess.Popen(cmd + [full_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-		except OSError, e:
-			self.logger.info("{0}\nInstall the Developer Tools if you want the auxiliary files to get invisible".format(e))
+		"""
+		This is system dependent, so by default we don't do anything.
+		"""
+		pass
 
 	def fls_file(self, file_base):
 		return os.path.join(os.curdir,file_base+os.path.extsep+'fls')
@@ -344,6 +342,21 @@ class Typesetter(object):
 		for aux_file in self.output_files(file_base):
 			if os.path.splitext(aux_file)[1] != '.pdf':
 				self.make_invisible(base, aux_file)
+
+def make_invisible_darwin(self, base, aux_file):
+	"""
+	The Darwin specific version for making files invisible.
+	"""
+	cmd = ['SetFile', '-a', 'V']
+	full_path = os.path.join(base,aux_file)
+	try:
+		output,error = subprocess.Popen(cmd + [full_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+	except OSError, e:
+		self.logger.info("{0}\nInstall the Developer Tools if you want the auxiliary files to get invisible".format(e))
+
+import platform
+if platform.system() == 'Darwin':
+	Typesetter.make_invisible = make_invisible_darwin
 
 class IsolatedTypesetter(Typesetter):
 
@@ -426,10 +439,6 @@ class IsolatedTypesetter(Typesetter):
 					shutil.move(src, final_path)
 				except IOError:
 					pass
-				else:
-					if os.uname()[0] == 'Darwin': # on Mac OS X we hide all moved files...
-						if os.system('/Developer/Tools/SetFile -a V {0}'.format(final_path)):
-							self.logger.info("Install the Developer Tools if you want the auxiliary files to get invisible")
 
 	def arguments(self):
 		args = super(IsolatedTypesetter,self).arguments()

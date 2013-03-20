@@ -243,10 +243,11 @@ class Test_Output(Harness):
 		self.t = Typesetter()
 		self.setup_logger()
 
+	@unittest.skip('IsolatedTypesetter does not make files invisible anymore')
 	def test_invisible(self):
 		self.typeset('simple')
 		for aux in self.t.output_files('simple'):
-			output = Popen(['/Developer/Tools/GetFileInfo', '-av', aux], stdout=PIPE).communicate()[0].rstrip()
+			output = Popen(['GetFileInfo', '-av', aux], stdout=PIPE).communicate()[0].rstrip()
 			if os.path.splitext(aux)[-1] != '.pdf':
 				print aux, output
 				## self.assertEqual(output, '1')
