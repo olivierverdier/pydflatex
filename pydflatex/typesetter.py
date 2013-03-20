@@ -319,7 +319,7 @@ class Typesetter(object):
 			os.system('/usr/bin/open "{0}"'.format(self.current_pdf_name))
 
 	def make_invisible(self, base, aux_file):
-		cmd = ['/Developer/Tools/SetFile','-a','V']
+		cmd = ['SetFile', '-a', 'V']
 		full_path = os.path.join(base,aux_file)
 		try:
 			output,error = subprocess.Popen(cmd + [full_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
