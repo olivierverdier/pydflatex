@@ -238,6 +238,12 @@ class Test_IsolatedOutput(Harness):
 		self.typeset('simple')
 		self.assert_contains('XeTeX')
 
+	def test_unicode_missing(self):
+		self.t.xetex = True
+		self.setup_logger()
+		self.typeset('unicode')
+		print self.output
+
 class Test_Output(Harness):
 	def setUp(self):
 		self.t = Typesetter()

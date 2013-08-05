@@ -5,6 +5,8 @@
 import re
 import string
 
+import codecs
+
 # The function `_' is defined here to prepare for internationalization.
 def _ (txt): return txt
 
@@ -25,6 +27,7 @@ re_warning = re.compile(
 "(LaTeX|Package)( (?P<pkg>.*))? Warning: (?P<text>.*)$")
 re_online = re.compile("(; reported)? on input line (?P<line>[0-9]*)")
 re_ignored = re.compile("; all text was ignored after line (?P<line>[0-9]*).$")
+re_missing_character = re.compile('^Missing character: There is no (?P<missing>\S)', flags=re.UNICODE)
 
 class LogCheck (object):
 	"""
@@ -44,15 +47,13 @@ class LogCheck (object):
 		exist.
 		"""
 		self.lines = None
-		with open(name) as file:
-			line = file.readline()
-			if not line:
-				file.close()
+		with codecs.open(name, encoding='utf-8') as log_file:
+			self.lines = log_file.readlines()
+			if not self.lines:
 				raise ValueError("Empty file")
+			line = self.lines[0]
 			if not re_loghead.match(line):
-				file.close()
 				raise ValueError("This doesn't seem to be a tex log file")
-			self.lines = file.readlines()
 
 	#-- Process information {{{2
 
@@ -269,6 +270,18 @@ class LogCheck (object):
 						"file": pos[-1]
 						}
 					d.update( m.groupdict() )
+					yield d
+				continue
+
+			missing_char = re_missing_character.match(line)
+			if missing_char:
+				mpos = { "file": pos[-1], "page": page }
+				if warnings:
+					info = missing_char.groupdict()
+					missing_char = info['missing']
+					## raise Exception(info)
+					d = {'kind': 'warning', 'text': u'Missing character: "{}"'.format(missing_char)}
+					d.update(mpos)
 					yield d
 				continue
 

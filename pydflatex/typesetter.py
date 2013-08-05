@@ -247,6 +247,7 @@ class Typesetter(object):
 
 	def arguments(self):
 		args = [self.engine(),
+				'-8bit',
 				'-no-mktex=pk',
 				'-interaction=batchmode',
 				'-recorder',
