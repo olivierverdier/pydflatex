@@ -24,7 +24,7 @@ def add_option(parser, *args, **kwargs):
 	kwargs['default'] = getattr(Typesetter, kwargs['dest'])
 	parser.add_argument(*args, **kwargs)
 
-add_option(parser, '-o', '--open', dest='open_pdf', help='view the pdf file(s) in a pdf viewer.', action='store_true')
+add_option(parser, '-o', '--open', dest='open_after', help='view the pdf file(s) in a pdf viewer.', action='store_true')
 
 add_option(parser, '-k', '--continue', help='continue on error', dest='halt_on_errors', action='store_false')
 

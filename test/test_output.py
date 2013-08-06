@@ -49,7 +49,7 @@ class Harness(unittest.TestCase):
 			self.output = Popen([bin_path, tex_path], stderr=PIPE).communicate()[1]
 		else:
 			try:
-				self.t.tex_path = os.path.join(test_dir, 'latex', file_name)
+				self.t.tex_path = tex_path
 				self.t.run()
 			finally:
 				self.output = self.logfile.read()
@@ -112,13 +112,15 @@ class Test_IsolatedOutput(Harness):
 		self.assert_contains(r'%sUndefined control sequence \nonexistingmacro.' % colours['error'])
 
 	def test_non_exist(self):
-		self.typeset('nonexistent')
+		with self.assertRaises(LaTeXError) as context:
+			self.typeset('nonexistent')
 		self.assert_contains(colours['error'])
-		self.assert_contains('File %s/latex/nonexistent.tex not found' % test_dir)
+		self.assertRegexpMatches(context.exception.message, 'nonexistent.tex not found', )
 
 	def test_wrong_ext(self):
-		self.typeset('simple.xxx')
-		self.assert_contains('Wrong extension for %s/latex/simple.xxx' % test_dir)
+		with self.assertRaises(LaTeXError):
+			self.typeset('simple.xxx')
+		## self.assert_contains('Wrong extension for %s/latex/simple.xxx' % test_dir)
 		self.assert_contains(colours['error'])
 
 	def test_trailing_dot(self):

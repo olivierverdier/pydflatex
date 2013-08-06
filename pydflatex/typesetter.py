@@ -182,7 +182,7 @@ class Typesetter(object):
 
 	halt_on_errors = True
 
-	open_pdf = False
+	open_after = False
 
 	clean_up = False
 
@@ -205,11 +205,22 @@ class Typesetter(object):
 
 
 
-	def run(self):
+	def run(self, tex_path=None):
 		"""
 		Compile the current tex file.
 		"""
-		self.typeset_file(self.tex_path)
+		if tex_path == None:
+			tex_path = self.tex_path
+		paths = self.paths(tex_path)
+		full_path = paths['full_path']
+
+		import time
+		time_start = time.time()
+		self.typeset(full_path)
+		self.display(paths['base'], paths['file_base'])
+		time_end = time.time()
+		self.logger.success('Typesetting of "{name}" completed in {time:.1f}s.'.format(name=full_path, time=(time_end - time_start)))
+		self.open_pdf(paths['root'])
 
 	def engine(self):
 		return ['pdflatex','xelatex'][self.xetex]
@@ -256,14 +267,18 @@ class Typesetter(object):
 			args.insert(-1, '-halt-on-error')
 		return args
 
-	def typeset_file(self, tex_path, ):
+	@classmethod
+	def paths(self, tex_path):
 		"""
-		Typeset one given file.
+		Figure out useful paths from the tex_path, and make sure that extension is tex.
+		For tex_path = path/to/file.tex, or path/to/file we get
+		base: path/to
+		file_base: file
+		root: path/to/file
+		full_path: path/to/file.tex
 		"""
-		import time
-		time_start = time.time()
 		# find out the directory where the file is
-		base,file_name = os.path.split(tex_path)
+		base, file_name = os.path.split(tex_path)
 		file_base, file_ext = os.path.splitext(file_name)
 		# setup the TEXINPUTS variable
 		os.environ['TEXINPUTS'] = base + ':'
@@ -271,31 +286,33 @@ class Typesetter(object):
 		root, file_ext = os.path.splitext(tex_path)
 		if file_ext[1:]:
 			if file_ext[1:] != 'tex':
-				self.logger.error("Wrong extension for {0}".format(tex_path))
-				return
+				raise LaTeXError("Wrong extension for {0}".format(tex_path))
 			else:
 				full_path = tex_path
 		else:
 			full_path = root + os.path.extsep + 'tex'
-
 		# make sure that the file exists
 		if not os.path.exists(full_path):
-			self.logger.error('File {0} not found'.format(full_path))
-			return
+			raise LaTeXError('File {0} not found'.format(full_path))
+		return {'base':base, 'file_base':file_base, 'root':root, 'full_path':full_path}
 
-
-		# log file
-		log_file = self.log_file_path(base,file_base)
-
+	def typeset(self, full_path, ):
+		"""
+		Typeset one given file.
+		"""
 		# run pdflatex
 		now = datetime.datetime.now().strftime('%Y-%m-%d %H.%M.%S')
 		self.logger.message("\t[{now}] {engine} {file}".format(engine=self.engine(), file=full_path, now=now))
 		arguments = self.arguments()
 		# append file name
-		arguments.append(root)
+		arguments.append(full_path)
 		self.logger.debug(arguments)
 		output = subprocess.Popen(arguments, stdout=subprocess.PIPE).communicate()[0]
 		self.logger.message(output.splitlines()[0])
+
+	def display(self, base, file_base):
+		# log file
+		log_file = self.log_file_path(base, file_base)
 		try:
 			error = self.parse_log(log_file)
 		except KeyboardInterrupt:
@@ -313,11 +330,11 @@ class Typesetter(object):
 				raise LaTeXError(error.get('text'))
 			self.post_typeset(base, file_base)
 
-		time_end = time.time()
-		self.logger.success('Typesetting of "{name}" completed in {time:.1f}s.'.format(name=full_path, time=(time_end - time_start)))
-		if self.open_pdf:
-			self.logger.info('Opening "{0}"...'.format(self.current_pdf_name))
-			os.system('/usr/bin/open "{0}"'.format(self.current_pdf_name))
+	def open_pdf(self, root):
+		if self.open_after:
+			pdf_name = root + os.path.extsep + 'pdf'
+			self.logger.info('Opening "{0}"...'.format(pdf_name))
+			os.system('/usr/bin/open "{0}"'.format(pdf_name))
 
 	def make_invisible(self, base, aux_file):
 		"""
@@ -325,6 +342,7 @@ class Typesetter(object):
 		"""
 		pass
 
+	@classmethod
 	def fls_file(self, file_base):
 		return os.path.join(os.curdir,file_base+os.path.extsep+'fls')
 
@@ -339,7 +357,6 @@ class Typesetter(object):
 
 
 	def post_typeset(self, base, file_base):
-		self.current_pdf_name = os.path.join(base, file_base + os.path.extsep + 'pdf')
 		for aux_file in self.output_files(file_base):
 			if os.path.splitext(aux_file)[1] != '.pdf':
 				self.make_invisible(base, aux_file)
@@ -393,7 +410,7 @@ class IsolatedTypesetter(Typesetter):
 		self.rm_tmp_dir()
 		self.create_tmp_dir()
 
-	def run(self):
+	def run(self, tex_path=None):
 		# clean up first if needed
 		if self.clean_up:
 			self.clean_up_tmp_dir()
