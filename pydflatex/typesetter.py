@@ -125,7 +125,7 @@ class LaTeXLoggerColour(LaTeXLogger):
 		styled = msg
 		if color:
 			styled = getattr(termstyle, style_specs['color'])(styled)
-		for attr in style_specs.get('attrs',[]):
+		for attr in style_specs.get('attrs', []):
 			styled = getattr(termstyle, attr)(styled)
 		return styled
 
@@ -159,7 +159,7 @@ class Typesetter(object):
 		self.tex_path = tex_path
 		# storing the options
 		for k, v in options.items():
-			self.__setattr__(k,v)
+			self.__setattr__(k, v)
 		# setting up the logger
 		self.setup_logger()
 		self.logger.debug(options)
@@ -202,7 +202,7 @@ class Typesetter(object):
 
 	# extensions of the files that will be "pulled back" to the directory where the file is
 	# on Mac OS X those files will be set invisible
-	move_exts = ['pdfsync','aux','idx','pdf']
+	move_exts = ['pdfsync', 'aux', 'idx', 'pdf']
 
 
 
@@ -266,6 +266,7 @@ class Typesetter(object):
 			return errors[0]
 
 
+	@classmethod
 	def log_file_path(self, base, file_base):
 		return os.path.join(base, file_base + os.path.extsep + 'log')
 
@@ -337,7 +338,7 @@ class Typesetter(object):
 
 	@classmethod
 	def fls_file(self, file_base):
-		return os.path.join(os.curdir,file_base+os.path.extsep+'fls')
+		return os.path.join(os.curdir, file_base+os.path.extsep+'fls')
 
 	def output_files(self, file_base):
 		fls_file = self.fls_file(file_base)
@@ -359,9 +360,9 @@ def make_invisible_darwin(self, base, aux_file):
 	The Darwin specific version for making files invisible.
 	"""
 	cmd = ['SetFile', '-a', 'V']
-	full_path = os.path.join(base,aux_file)
+	full_path = os.path.join(base, aux_file)
 	try:
-		output,error = subprocess.Popen(cmd + [full_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+		subprocess.Popen(cmd + [full_path]).communicate()
 	except OSError, e:
 		self.logger.info("{0}\nInstall the Developer Tools if you want the auxiliary files to get invisible".format(e))
 
@@ -372,7 +373,7 @@ if platform.system() == 'Darwin':
 class IsolatedTypesetter(Typesetter):
 
 	def __init__(self, **options):
-		super(IsolatedTypesetter,self).__init__(**options)
+		super(IsolatedTypesetter, self).__init__(**options)
 		self.tmp_dir = self.create_tmp_dir()
 
 	tmp_dir_name = '.latex_tmp'
@@ -407,7 +408,7 @@ class IsolatedTypesetter(Typesetter):
 		# clean up first if needed
 		if self.clean_up:
 			self.clean_up_tmp_dir()
-		super(IsolatedTypesetter,self).run()
+		super(IsolatedTypesetter, self).run()
 
 	def log_file_path(self, base, file_base):
 		return os.path.join(self.tmp_dir, file_base + os.path.extsep + 'log')
@@ -419,7 +420,7 @@ class IsolatedTypesetter(Typesetter):
 		for aux_ext in self.move_exts:
 			aux_name = file_base + os.path.extsep + aux_ext
 			src = os.path.join(self.tmp_dir, aux_name)
-			dest = os.path.join(base,os.curdir)
+			dest = os.path.join(base, os.curdir)
 			# move the pdf in the current directory
 			if aux_ext == 'pdf':
 				pdf_name = os.path.join(base, aux_name)
@@ -428,7 +429,7 @@ class IsolatedTypesetter(Typesetter):
 					pdf_path = os.path.join(os.curdir, aux_name)
 					pdf_name = aux_name
 				if self.new_pdf_name:
-					pdf_path = os.path.join(dest,self.new_pdf_name + os.path.extsep + 'pdf')
+					pdf_path = os.path.join(dest, self.new_pdf_name + os.path.extsep + 'pdf')
 					pdf_name = dest
 				# store the pdf name for later use
 				self.current_pdf_name = pdf_name
@@ -452,6 +453,6 @@ class IsolatedTypesetter(Typesetter):
 					pass
 
 	def arguments(self):
-		args = super(IsolatedTypesetter,self).arguments()
+		args = super(IsolatedTypesetter, self).arguments()
 		args.append('-output-directory={0}'.format(self.tmp_dir))
 		return args
