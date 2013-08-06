@@ -10,9 +10,13 @@ A wrapper around pdflatex to allow:
 import os
 import shutil
 import datetime
+import time
 
 import logging
 import subprocess
+
+# loading the log parser
+from pydflatex.latexlogparser import LogCheck
 
 class LaTeXLogger(logging.Logger):
 	line_template = 'L{0:5}'
@@ -156,9 +160,6 @@ class Typesetter(object):
 		# storing the options
 		for k, v in options.items():
 			self.__setattr__(k,v)
-		# loading the log parser
-		from pydflatex.latexlogparser import LogCheck
-		self.parser = LogCheck()
 		# setting up the logger
 		self.setup_logger()
 		self.logger.debug(options)
@@ -214,23 +215,35 @@ class Typesetter(object):
 		paths = self.paths(tex_path)
 		full_path = paths['full_path']
 
-		import time
+		# Typeset
 		time_start = time.time()
 		self.typeset(full_path)
-		self.display(paths['base'], paths['file_base'])
 		time_end = time.time()
+
+		# Parse log
+		log_file_path = self.log_file_path(paths['base'], paths['file_base'])
+		parser = LogCheck()
+		parser.read(log_file_path)
+
+		# Process info from parser
+		error = self.process_log(parser)
+		if error and self.halt_on_errors:
+			raise LaTeXError(error.get('text'))
+
+		# End message
 		self.logger.success('Typesetting of "{name}" completed in {time:.1f}s.'.format(name=full_path, time=(time_end - time_start)))
+
+		# Post process
+		self.handle_aux(paths['base'], paths['file_base'])
 		self.open_pdf(paths['root'])
 
 	def engine(self):
 		return ['pdflatex','xelatex'][self.xetex]
 
-	def parse_log(self, log_file):
+	def process_log(self, parser):
 		"""
-		Read the log file and print out the gist of it.
+		Process information from the parser and print out the gist of it.
 		"""
-		parser = self.parser
-		parser.read(log_file)
 		for box in parser.get_boxes():
 			has_occ = box['text'].find(r' has occurred while \output is active')
 			if has_occ != -1:
@@ -310,26 +323,6 @@ class Typesetter(object):
 		output = subprocess.Popen(arguments, stdout=subprocess.PIPE).communicate()[0]
 		self.logger.message(output.splitlines()[0])
 
-	def display(self, base, file_base):
-		# log file
-		log_file = self.log_file_path(base, file_base)
-		try:
-			error = self.parse_log(log_file)
-		except KeyboardInterrupt:
-			self.logger.error("Keyboard Interruption")
-			import sys
-			sys.exit()
-		except IOError: # if the file is invalid or doesn't exist
-			self.logger.error("Log file not found")
-			raise
-		except ValueError:
-			self.logger.error("Wrong format of the log file")
-			raise # stop processing this file
-		else:
-			if error and self.halt_on_errors:
-				raise LaTeXError(error.get('text'))
-			self.post_typeset(base, file_base)
-
 	def open_pdf(self, root):
 		if self.open_after:
 			pdf_name = root + os.path.extsep + 'pdf'
@@ -356,7 +349,7 @@ class Typesetter(object):
 					yield aux_file
 
 
-	def post_typeset(self, base, file_base):
+	def handle_aux(self, base, file_base):
 		for aux_file in self.output_files(file_base):
 			if os.path.splitext(aux_file)[1] != '.pdf':
 				self.make_invisible(base, aux_file)
@@ -419,7 +412,7 @@ class IsolatedTypesetter(Typesetter):
 	def log_file_path(self, base, file_base):
 		return os.path.join(self.tmp_dir, file_base + os.path.extsep + 'log')
 
-	def post_typeset(self, base, file_base):
+	def handle_aux(self, base, file_base):
 		"""
 		Move some auxiliary files back to the tex directory
 		"""
