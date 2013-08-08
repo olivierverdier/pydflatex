@@ -271,6 +271,9 @@ class Typesetter(object):
 		return os.path.join(base, file_base + os.path.extsep + 'log')
 
 	def arguments(self):
+		"""
+		Arguments to the (pdf|xe)latex command.
+		"""
 		args = [self.engine(),
 				'-8bit',
 				'-no-mktex=pk',
@@ -325,6 +328,9 @@ class Typesetter(object):
 		self.logger.message(output.splitlines()[0])
 
 	def open_pdf(self, root):
+		"""
+		Open the generated pdf file.
+		"""
 		if self.open_after:
 			pdf_name = root + os.path.extsep + 'pdf'
 			self.logger.info('Opening "{0}"...'.format(pdf_name))
@@ -341,6 +347,9 @@ class Typesetter(object):
 		return os.path.join(os.curdir, file_base+os.path.extsep+'fls')
 
 	def output_files(self, file_base):
+		"""
+		Generate the paths of all the auxiliary files.
+		"""
 		fls_file = self.fls_file(file_base)
 		yield fls_file
 		with open(fls_file) as lines:
