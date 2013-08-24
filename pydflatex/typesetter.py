@@ -180,6 +180,9 @@ class Typesetter(object):
 				self.logger.addHandler(handler)
 
 
+	typesetting = True
+
+	log_parsing = True
 
 	halt_on_errors = True
 
@@ -204,43 +207,64 @@ class Typesetter(object):
 	# on Mac OS X those files will be set invisible
 	move_exts = ['pdfsync', 'aux', 'idx', 'pdf']
 
+	def prepare(self, tex_path=None):
+		if tex_path == None:
+			tex_path = self.tex_path
+		paths = self.paths(tex_path)
+		return tex_path, paths
 
+	def parse_log(self, log_file_path):
+		"""
+		Parse log file
+		"""
+		parser = LogCheck()
+		parser.read(log_file_path)
+		return parser
+
+	def process_log(self, log_file_path):
+		"""
+		Parse log and display corresponding info.
+		"""
+		parser = self.parse_log(log_file_path)
+
+		# Process info from parser
+		error = self.process_parser(parser)
+		if error and self.halt_on_errors:
+			raise LaTeXError(error.get('text'))
 
 	def run(self, tex_path=None):
 		"""
 		Compile the current tex file.
 		"""
-		if tex_path == None:
-			tex_path = self.tex_path
-		paths = self.paths(tex_path)
+		tex_path, paths = self.prepare(tex_path)
+
 		full_path = paths['full_path']
 
-		# Typeset
-		time_start = time.time()
-		self.typeset(full_path)
-		time_end = time.time()
+		if self.typesetting:
+			# Typeset
+			time_start = time.time()
+			self.typeset(full_path)
+			time_end = time.time()
+			success_message = 'Typesetting of "{name}" completed in {time:.1f}s.'.format(name=full_path, time=(time_end - time_start))
 
-		# Parse log
-		log_file_path = self.log_file_path(paths['base'], paths['file_base'])
-		parser = LogCheck()
-		parser.read(log_file_path)
 
-		# Process info from parser
-		error = self.process_log(parser)
-		if error and self.halt_on_errors:
-			raise LaTeXError(error.get('text'))
+		if self.log_parsing:
+			# Parse log
+			log_file_path = self.log_file_path(paths['base'], paths['file_base'])
+			self.process_log(log_file_path)
 
-		# End message
-		self.logger.success('Typesetting of "{name}" completed in {time:.1f}s.'.format(name=full_path, time=(time_end - time_start)))
+		if self.typesetting:
+			# Print success message
+			self.logger.success(success_message)
 
-		# Post process
-		self.handle_aux(paths['base'], paths['file_base'])
-		self.open_pdf(paths['root'])
+			# Post process
+			self.handle_aux(paths['base'], paths['file_base'])
+			self.open_pdf(paths['root'])
 
 	def engine(self):
 		return ['pdflatex','xelatex'][self.xetex]
 
-	def process_log(self, parser):
+	def process_parser(self, parser):
 		"""
 		Process information from the parser and print out the gist of it.
 		"""

@@ -12,6 +12,7 @@ Some useful options:
 * `-o`: open the pdf in a pdf viewer
 * `-k`: keep compiling on error
 * `-w`: show the box warnings
+* `-l`: only parse existing log
 
 ## Features
 

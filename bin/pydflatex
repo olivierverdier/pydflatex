@@ -40,6 +40,11 @@ add_option(parser, '-p', '--plain', dest='colour', help='No coloured output', ac
 
 add_option(parser, '-x', '--xetex', dest='xetex', help='Use XeLaTeX engine', action='store_true')
 
+add_option(parser, '-l', '--log-parsing', dest='typesetting', help='Only parse log', action='store_false')
+
+add_option(parser, '-t', '--typesetting', dest='log_parsing', help='Only typeset', action='store_false')
+
+
 parser.add_argument('tex_path', type=str, metavar='tex path', help='path to tex file')
 
 args = parser.parse_args()
