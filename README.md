@@ -14,6 +14,8 @@ Some useful options:
 * `-w`: show the box warnings
 * `-l`: only parse existing log
 
+A full list of options is available with `pydflatex --help`.
+
 ## Features
 
 ``pydflatex`` is a wrapper around ``pdflatex`` which produces a short, readable, coloured output.
