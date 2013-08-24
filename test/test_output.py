@@ -27,12 +27,9 @@ import re
 from pydflatex import Typesetter, IsolatedTypesetter
 from pydflatex.typesetter import LaTeXLoggerColour, LaTeXError
 
-try:
-	import termcolor
-except ImportError:
-	colours = dict([(key, '') for key in LaTeXLoggerColour.colours])
-else:
-	colours = dict([(key, termcolor.colored('', **colargs)[:-4]) for key, colargs in LaTeXLoggerColour.colours.items()])
+import termstyle
+termstyle.enable()
+colours = dict([(style, LaTeXLoggerColour.styled('', style)[:-8]) for style in LaTeXLoggerColour.colours])
 
 class Harness(unittest.TestCase):
 
@@ -90,11 +87,14 @@ class Test_LogParse(Harness):
 		self.assert_contains("undefined")
 		self.assert_contains("nonexistent")
 		self.assert_contains('There were undefined references.', -1)
+## 		self.assert_contains(ref_warning, -4)
+		self.assert_contains(colours['error'], -2)
 
 	def test_box(self):
 		self.t.suppress_box_warning = False
 		self.typeset('box')
-		self.assert_contains('%sOverfull' % colours['box'])
+		self.assert_contains('Overfull')
+		self.assert_contains(colours['box'])
 		self.assert_contains('p.1')
 
 	def test_twice_label(self):
@@ -121,18 +121,27 @@ class Test_LogParse(Harness):
 		self.typeset('unicode')
 		print self.output
 
-	def test_non_exist(self):
-		with self.assertRaises(LaTeXError) as context:
-			self.typeset('nonexistent')
-		self.assert_contains(colours['error'])
-		self.assertRegexpMatches(context.exception.message, 'nonexistent.tex not found', )
+
+	def test_colours(self):
+		self.typeset('cite')
+		self.assert_contains('citation', line=0, regexp=False)
+		self.assert_contains(colours['error'], line=0)
+
+	def test_nostyle(self):
+		self.t.colour = False
+		self.setup_logger()
+		self.typeset('cite')
+		self.assert_contains('[citation]', line=0, regexp=False)
 
 	def test_wrong_ext(self):
 		with self.assertRaises(LaTeXError):
 			self.typeset('simple.xxx')
 		## self.assert_contains('Wrong extension for %s/latex/simple.xxx' % test_dir)
-		self.assert_contains(colours['error'])
 
+	def test_non_exist(self):
+		with self.assertRaises(LaTeXError) as context:
+			self.typeset('nonexistent')
+		self.assertRegexpMatches(context.exception.message, 'nonexistent.tex not found', )
 
 class Test_IsolatedOutput(Harness):
 	"""
@@ -175,8 +184,6 @@ class Test_IsolatedOutput(Harness):
 		self.typeset('simple.')
 		self.assert_success()
 
-## 		self.assert_contains(ref_warning, -4)
-		self.assert_contains(colours['error'], -2)
 
 	@unittest.skip('Rerun is broken')
 	def test_rerun(self):
@@ -246,12 +253,6 @@ class Test_IsolatedOutput(Harness):
 		print os.path.exists('./.latex_tmp/continue.pdf')
 		print os.path.exists('./latex/continue.pdf')
 		self.assertTrue(self.exists('continue.pdf'))
-
-	def test_nostyle(self):
-		self.t.colour = False
-		self.setup_logger()
-		self.typeset('simple')
-		self.assert_contains('^Typesetting', regexp=True)
 
 	def test_xetex(self):
 		self.t.xetex = True

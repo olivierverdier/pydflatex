@@ -119,6 +119,7 @@ class LaTeXLoggerColour(LaTeXLogger):
 		'info': {'attrs': ['bold']}
 		}
 
+	@classmethod
 	def styled(self, msg, style):
 		style_specs = self.colours[style]
 		color = style_specs.get('color')
