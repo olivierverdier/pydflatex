@@ -1,0 +1,82 @@
+This is XeTeX, Version 3.1415926-2.5-0.9999.3 (TeX Live 2013) (format=xelatex 2013.6.26)  5 AUG 2013 13:30
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**unicode.tex
+(./unicode.tex
+LaTeX2e <2011/06/27>
+Babel <3.9f> and hyphenation patterns for 78 languages loaded.
+(/usr/local/texlive/2013/texmf-dist/tex/latex/standalone/standalone.cls
+Document Class: standalone 2012/09/15 v1.1b Class to compile TeX sub-files stan
+dalone
+(/usr/local/texlive/2013/texmf-dist/tex/generic/oberdiek/ifluatex.sty
+Package: ifluatex 2010/03/01 v1.3 Provides the ifluatex switch (HO)
+Package ifluatex Info: LuaTeX not detected.
+) (/usr/local/texlive/2013/texmf-dist/tex/generic/oberdiek/ifpdf.sty
+Package: ifpdf 2011/01/30 v2.3 Provides the ifpdf switch (HO)
+Package ifpdf Info: pdfTeX in PDF mode is not detected.
+) (/usr/local/texlive/2013/texmf-dist/tex/generic/ifxetex/ifxetex.sty
+Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
+) (/usr/local/texlive/2013/texmf-dist/tex/latex/xkeyval/xkeyval.sty
+Package: xkeyval 2012/10/14 v2.6b package option processing (HA)
+(/usr/local/texlive/2013/texmf-dist/tex/generic/xkeyval/xkeyval.tex
+\XKV@toks=\toks14
+\XKV@tempa@toks=\toks15
+\XKV@depth=\count80
+File: xkeyval.tex 2012/10/14 v2.6b key=value parser (HA)
+(/usr/local/texlive/2013/texmf-dist/tex/generic/xkeyval/keyval.tex)))
+\sa@internal=\count81
+(/usr/local/texlive/2013/texmf-dist/tex/latex/standalone/standalone.cfg
+File: standalone.cfg 2012/09/15 v1.1b Default configuration file for 'standalon
+e' class
+) (/usr/local/texlive/2013/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
+(/usr/local/texlive/2013/texmf-dist/tex/latex/base/size10.clo
+File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
+)
+\c@part=\count82
+\c@section=\count83
+\c@subsection=\count84
+\c@subsubsection=\count85
+\c@paragraph=\count86
+\c@subparagraph=\count87
+\c@figure=\count88
+\c@table=\count89
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+\sa@box=\box26
+) (./unicode.aux)
+\openout1 = `unicode.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 2.
+LaTeX Font Info:    ... okay on input line 2.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 2.
+LaTeX Font Info:    ... okay on input line 2.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 2.
+LaTeX Font Info:    ... okay on input line 2.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 2.
+LaTeX Font Info:    ... okay on input line 2.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 2.
+LaTeX Font Info:    ... okay on input line 2.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 2.
+LaTeX Font Info:    ... okay on input line 2.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 3.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 3.
+Missing character: There is no α in font cmmi10!
+[1
+
+] [2] (./unicode.aux) ) 
+Here is how much of TeX's memory you used:
+ 669 strings out of 493938
+ 10441 string characters out of 6148857
+ 61084 words of memory out of 5000000
+ 4034 multiletter control sequences out of 15000+600000
+ 3640 words of font info for 14 fonts, out of 8000000 for 9000
+ 1144 hyphenation exceptions out of 8191
+ 34i,4n,56p,186b,102s stack positions out of 5000i,500n,10000p,200000b,80000s
+
+Output written on unicode.pdf (2 pages).

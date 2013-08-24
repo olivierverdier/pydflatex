@@ -1,0 +1,126 @@
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.6.26)  8 AUG 2013 10:59
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**box.tex
+(./box.tex
+LaTeX2e <2011/06/27>
+Babel <3.9f> and hyphenation patterns for 78 languages loaded.
+(/usr/local/texlive/2013/texmf-dist/tex/latex/koma-script/scrartcl.cls
+Document Class: scrartcl 2012/07/29 v3.11b KOMA-Script document class (article)
+
+(/usr/local/texlive/2013/texmf-dist/tex/latex/koma-script/scrkbase.sty
+Package: scrkbase 2012/07/29 v3.11b KOMA-Script package (KOMA-Script-dependent 
+basics and keyval usage)
+(/usr/local/texlive/2013/texmf-dist/tex/latex/koma-script/scrbase.sty
+Package: scrbase 2012/07/29 v3.11b KOMA-Script package (KOMA-Script-independent
+ basics and keyval usage)
+(/usr/local/texlive/2013/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks14
+) (/usr/local/texlive/2013/texmf-dist/tex/latex/koma-script/scrlfile.sty
+Package: scrlfile 2012/06/15 v3.12 KOMA-Script package (loading files)
+Package scrlfile, 2012/06/15 v3.12 KOMA-Script package (loading files)
+                  Copyright (C) Markus Kohm
+
+))) (/usr/local/texlive/2013/texmf-dist/tex/latex/koma-script/tocbasic.sty
+Package: tocbasic 2012/04/04 v3.10b KOMA-Script package (handling toc-files)
+)
+Package tocbasic Info: omitting babel extension for `toc'
+(tocbasic)             because of feature `nobabel' available
+(tocbasic)             for `toc' on input line 115.
+Package tocbasic Info: omitting babel extension for `lof'
+(tocbasic)             because of feature `nobabel' available
+(tocbasic)             for `lof' on input line 116.
+Package tocbasic Info: omitting babel extension for `lot'
+(tocbasic)             because of feature `nobabel' available
+(tocbasic)             for `lot' on input line 117.
+Class scrartcl Info: File `scrsize11pt.clo' used instead of
+(scrartcl)           file `scrsize11.clo' to setup font sizes on input line 126
+7.
+(/usr/local/texlive/2013/texmf-dist/tex/latex/koma-script/scrsize11pt.clo
+File: scrsize11pt.clo 2012/07/29 v3.11b KOMA-Script font size class option (11p
+t)
+) (/usr/local/texlive/2013/texmf-dist/tex/latex/koma-script/typearea.sty
+Package: typearea 2012/07/29 v3.11b KOMA-Script package (type area)
+Package typearea, 2012/07/29 v3.11b KOMA-Script package (type area)
+                  Copyright (C) Frank Neukam, 1992-1994
+                  Copyright (C) Markus Kohm, 1994-
+
+\ta@bcor=\skip41
+\ta@div=\count79
+\ta@hblk=\skip42
+\ta@vblk=\skip43
+\ta@temp=\skip44
+Package typearea Info: These are the values describing the layout:
+(typearea)             DIV  = 10
+(typearea)             BCOR = 0.0pt
+(typearea)             \paperwidth      = 597.50793pt
+(typearea)              \textwidth      = 418.25555pt
+(typearea)              DIV departure   = -6%
+(typearea)              \evensidemargin = 17.3562pt
+(typearea)              \oddsidemargin  = 17.3562pt
+(typearea)             \paperheight     = 845.04694pt
+(typearea)              \textheight     = 595.80026pt
+(typearea)              \topmargin      = -25.16531pt
+(typearea)              \headheight     = 17.0pt
+(typearea)              \headsep        = 20.40001pt
+(typearea)              \topskip        = 11.0pt
+(typearea)              \footskip       = 47.60002pt
+(typearea)              \baselineskip   = 13.6pt
+(typearea)              on input line 1213.
+)
+\c@part=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\c@subparagraph=\count85
+\abovecaptionskip=\skip45
+\belowcaptionskip=\skip46
+\c@pti@nb@sid@b@x=\box26
+\c@figure=\count86
+\c@table=\count87
+\bibindent=\dimen102
+) (./box.aux)
+\openout1 = `box.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 2.
+LaTeX Font Info:    ... okay on input line 2.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 2.
+LaTeX Font Info:    ... okay on input line 2.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 2.
+LaTeX Font Info:    ... okay on input line 2.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 2.
+LaTeX Font Info:    ... okay on input line 2.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 2.
+LaTeX Font Info:    ... okay on input line 2.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 2.
+LaTeX Font Info:    ... okay on input line 2.
+
+Overfull \hbox (13.8382pt too wide) in paragraph at lines 5--6
+[]\OT1/cmr/m/n/24.88 LonglongLonglongLonglongLonglongWord 
+ []
+
+[1
+
+{/usr/local/texlive/2013/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] (./box.
+aux) ) 
+Here is how much of TeX's memory you used:
+ 1207 strings out of 493315
+ 18754 string characters out of 6137904
+ 95162 words of memory out of 5000000
+ 4723 multiletter control sequences out of 15000+600000
+ 4239 words of font info for 16 fonts, out of 8000000 for 9000
+ 957 hyphenation exceptions out of 8191
+ 35i,6n,35p,233b,136s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.
+pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pf
+b>
+Output written on box.pdf (1 page, 16805 bytes).
+PDF statistics:
+ 16 PDF objects out of 1000 (max. 8388607)
+ 10 compressed objects within 1 object stream
+ 0 named destinations out of 1000 (max. 500000)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+
