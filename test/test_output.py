@@ -143,6 +143,10 @@ class Test_LogParse(Harness):
 			self.typeset('nonexistent')
 		self.assertRegexpMatches(context.exception.message, 'nonexistent.tex not found', )
 
+	def test_encoding(self):
+		self.setup_logger()
+		self.typeset('encoding')
+
 class Test_IsolatedOutput(Harness):
 	"""
 	Test involving LaTeX running.

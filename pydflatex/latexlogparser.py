@@ -47,7 +47,7 @@ class LogCheck (object):
 		exist.
 		"""
 		self.lines = None
-		with codecs.open(name, encoding='utf-8') as log_file:
+		with codecs.open(name, encoding='utf-8', errors='replace') as log_file:
 			self.lines = log_file.readlines()
 			if not self.lines:
 				raise ValueError("Empty file")
