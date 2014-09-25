@@ -56,8 +56,6 @@ class Typesetter(object):
 
 	log_parsing = True
 
-	halt_on_errors = True
-
 	open_after = False
 
 	clean_up = False
@@ -71,10 +69,6 @@ class Typesetter(object):
 
 	new_pdf_name = ''
 
-	suppress_box_warning = True
-
-	xetex = False
-
 	# extensions of the files that will be "pulled back" to the directory where the file is
 	# on Mac OS X those files will be set invisible
 	move_exts = ['pdfsync', 'aux', 'idx', 'pdf']
@@ -85,24 +79,34 @@ class Typesetter(object):
 		paths = self.paths(tex_path)
 		return tex_path, paths
 
-	def parse_log(self, log_file_path):
+	@classmethod
+	def paths(self, tex_path):
 		"""
-		Parse log file
+		Figure out useful paths from the tex_path, and make sure that extension is tex.
+		For tex_path = path/to/file.tex, or path/to/file we get
+		base: path/to
+		file_base: file
+		root: path/to/file
+		full_path: path/to/file.tex
 		"""
-		parser = LogCheck()
-		parser.read(log_file_path)
-		return parser
-
-	def process_log(self, log_file_path):
-		"""
-		Parse log and display corresponding info.
-		"""
-		parser = self.parse_log(log_file_path)
-
-		# Process info from parser
-		error = self.process_parser(parser)
-		if error and self.halt_on_errors:
-			raise LaTeXError(error.get('text'))
+		# find out the directory where the file is
+		base, file_name = os.path.split(tex_path)
+		file_base, file_ext = os.path.splitext(file_name)
+		# setup the TEXINPUTS variable
+		os.environ['TEXINPUTS'] = base + ':'
+		# find out the name of the file to compile
+		root, file_ext = os.path.splitext(tex_path)
+		if file_ext[1:]:
+			if file_ext[1:] != 'tex':
+				raise LaTeXError("Wrong extension for {0}".format(tex_path))
+			else:
+				full_path = tex_path
+		else:
+			full_path = root + os.path.extsep + 'tex'
+		# make sure that the file exists
+		if not os.path.exists(full_path):
+			raise LaTeXError('File {0} not found'.format(full_path))
+		return {'base':base, 'file_base':file_base, 'root':root, 'full_path':full_path}
 
 	def run(self, tex_path=None):
 		"""
@@ -134,8 +138,68 @@ class Typesetter(object):
 			if self.open_after:
 				self.open_pdf(paths['root'])
 
+	# Typesetting
+
+	halt_on_errors = True
+	xetex = False
+
 	def engine(self):
 		return ['pdflatex','xelatex'][self.xetex]
+
+	def arguments(self):
+		"""
+		Arguments to the (pdf|xe)latex command.
+		"""
+		args = [self.engine(),
+				'-8bit',
+				'-no-mktex=pk',
+				'-interaction=batchmode',
+				'-recorder',
+				]
+		if self.halt_on_errors:
+			args.insert(-1, '-halt-on-error')
+		return args
+
+	def typeset(self, full_path, ):
+		"""
+		Typeset one given file.
+		"""
+		# run pdflatex
+		now = datetime.datetime.now().strftime('%Y-%m-%d %H.%M.%S')
+		self.logger.message("\t[{now}] {engine} {file}".format(engine=self.engine(), file=full_path, now=now))
+		arguments = self.arguments()
+		# append file name
+		arguments.append(full_path)
+		self.logger.debug(arguments)
+		output = subprocess.Popen(arguments, stdout=subprocess.PIPE).communicate()[0]
+		self.logger.message(output.splitlines()[0])
+
+	# Log parsing
+
+	suppress_box_warning = True
+
+	@classmethod
+	def log_file_path(self, base, file_base):
+		return os.path.join(base, file_base + os.path.extsep + 'log')
+
+	def parse_log(self, log_file_path):
+		"""
+		Parse log file
+		"""
+		parser = LogCheck()
+		parser.read(log_file_path)
+		return parser
+
+	def process_log(self, log_file_path):
+		"""
+		Parse log and display corresponding info.
+		"""
+		parser = self.parse_log(log_file_path)
+
+		# Process info from parser
+		error = self.process_parser(parser)
+		if error and self.halt_on_errors:
+			raise LaTeXError(error.get('text'))
 
 	def process_parser(self, parser):
 		"""
@@ -162,81 +226,7 @@ class Typesetter(object):
 				self.logger.latex_error(error)
 			return errors[0]
 
-
-	@classmethod
-	def log_file_path(self, base, file_base):
-		return os.path.join(base, file_base + os.path.extsep + 'log')
-
-	def arguments(self):
-		"""
-		Arguments to the (pdf|xe)latex command.
-		"""
-		args = [self.engine(),
-				'-8bit',
-				'-no-mktex=pk',
-				'-interaction=batchmode',
-				'-recorder',
-				]
-		if self.halt_on_errors:
-			args.insert(-1, '-halt-on-error')
-		return args
-
-	@classmethod
-	def paths(self, tex_path):
-		"""
-		Figure out useful paths from the tex_path, and make sure that extension is tex.
-		For tex_path = path/to/file.tex, or path/to/file we get
-		base: path/to
-		file_base: file
-		root: path/to/file
-		full_path: path/to/file.tex
-		"""
-		# find out the directory where the file is
-		base, file_name = os.path.split(tex_path)
-		file_base, file_ext = os.path.splitext(file_name)
-		# setup the TEXINPUTS variable
-		os.environ['TEXINPUTS'] = base + ':'
-		# find out the name of the file to compile
-		root, file_ext = os.path.splitext(tex_path)
-		if file_ext[1:]:
-			if file_ext[1:] != 'tex':
-				raise LaTeXError("Wrong extension for {0}".format(tex_path))
-			else:
-				full_path = tex_path
-		else:
-			full_path = root + os.path.extsep + 'tex'
-		# make sure that the file exists
-		if not os.path.exists(full_path):
-			raise LaTeXError('File {0} not found'.format(full_path))
-		return {'base':base, 'file_base':file_base, 'root':root, 'full_path':full_path}
-
-	def typeset(self, full_path, ):
-		"""
-		Typeset one given file.
-		"""
-		# run pdflatex
-		now = datetime.datetime.now().strftime('%Y-%m-%d %H.%M.%S')
-		self.logger.message("\t[{now}] {engine} {file}".format(engine=self.engine(), file=full_path, now=now))
-		arguments = self.arguments()
-		# append file name
-		arguments.append(full_path)
-		self.logger.debug(arguments)
-		output = subprocess.Popen(arguments, stdout=subprocess.PIPE).communicate()[0]
-		self.logger.message(output.splitlines()[0])
-
-	def open_pdf(self, root):
-		"""
-		Open the generated pdf file.
-		"""
-		pdf_name = root + os.path.extsep + 'pdf'
-		self.logger.info('Opening "{0}"...'.format(pdf_name))
-		os.system('/usr/bin/open "{0}"'.format(pdf_name))
-
-	def make_invisible(self, base, aux_file):
-		"""
-		This is system dependent, so by default we don't do anything.
-		"""
-		pass
+	# Post processing
 
 	@classmethod
 	def fls_file(self, file_base):
@@ -254,11 +244,25 @@ class Typesetter(object):
 					aux_file = line[7:].rstrip()
 					yield aux_file
 
+	def make_invisible(self, base, aux_file):
+		"""
+		This is system dependent, so by default we don't do anything.
+		"""
+		pass
 
 	def handle_aux(self, base, file_base):
 		for aux_file in self.output_files(self.fls_file(file_base)):
 			if os.path.splitext(aux_file)[1] != '.pdf':
 				self.make_invisible(base, aux_file)
+
+	def open_pdf(self, root):
+		"""
+		Open the generated pdf file.
+		"""
+		pdf_name = root + os.path.extsep + 'pdf'
+		self.logger.info('Opening "{0}"...'.format(pdf_name))
+		os.system('/usr/bin/open "{0}"'.format(pdf_name))
+
 
 def make_invisible_darwin(self, base, aux_file):
 	"""
