@@ -209,7 +209,7 @@ class Typesetter(object):
 	move_exts = ['pdfsync', 'aux', 'idx', 'pdf']
 
 	def prepare(self, tex_path=None):
-		if tex_path == None:
+		if tex_path is None:
 			tex_path = self.tex_path
 		paths = self.paths(tex_path)
 		return tex_path, paths
@@ -371,11 +371,11 @@ class Typesetter(object):
 	def fls_file(self, file_base):
 		return os.path.join(os.curdir, file_base+os.path.extsep+'fls')
 
-	def output_files(self, file_base):
+	@classmethod
+	def output_files(self, fls_file):
 		"""
 		Generate the paths of all the auxiliary files.
 		"""
-		fls_file = self.fls_file(file_base)
 		yield fls_file
 		with open(fls_file) as lines:
 			for line in lines:
@@ -385,7 +385,7 @@ class Typesetter(object):
 
 
 	def handle_aux(self, base, file_base):
-		for aux_file in self.output_files(file_base):
+		for aux_file in self.output_files(self.fls_file(file_base)):
 			if os.path.splitext(aux_file)[1] != '.pdf':
 				self.make_invisible(base, aux_file)
 

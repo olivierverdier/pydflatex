@@ -272,7 +272,7 @@ class Test_Output(Harness):
 	@unittest.skip('IsolatedTypesetter does not make files invisible anymore')
 	def test_invisible(self):
 		self.typeset('simple')
-		for aux in self.t.output_files('simple'):
+		for aux in self.t.output_files(self.t.fls_file('simple')):
 			output = Popen(['GetFileInfo', '-av', aux], stdout=PIPE).communicate()[0].rstrip()
 			if os.path.splitext(aux)[-1] != '.pdf':
 				print aux, output
@@ -281,6 +281,6 @@ class Test_Output(Harness):
 	def test_output_files(self):
 		self.typeset('simple')
 		expected = ['./simple.fls', 'simple.log', 'simple.aux', 'simple.pdf']
-		computed = list(self.t.output_files('simple'))
+		computed = list(self.t.output_files(self.t.fls_file('simple')))
 		self.assertEqual(computed, expected)
 
