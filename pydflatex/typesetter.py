@@ -131,7 +131,8 @@ class Typesetter(object):
 
 			# Post process
 			self.handle_aux(paths['base'], paths['file_base'])
-			self.open_pdf(paths['root'])
+			if self.open_after:
+				self.open_pdf(paths['root'])
 
 	def engine(self):
 		return ['pdflatex','xelatex'][self.xetex]
@@ -227,10 +228,9 @@ class Typesetter(object):
 		"""
 		Open the generated pdf file.
 		"""
-		if self.open_after:
-			pdf_name = root + os.path.extsep + 'pdf'
-			self.logger.info('Opening "{0}"...'.format(pdf_name))
-			os.system('/usr/bin/open "{0}"'.format(pdf_name))
+		pdf_name = root + os.path.extsep + 'pdf'
+		self.logger.info('Opening "{0}"...'.format(pdf_name))
+		os.system('/usr/bin/open "{0}"'.format(pdf_name))
 
 	def make_invisible(self, base, aux_file):
 		"""
