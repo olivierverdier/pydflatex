@@ -25,7 +25,8 @@ import re
 
 
 from pydflatex import Typesetter, IsolatedTypesetter
-from pydflatex.typesetter import LaTeXLoggerColour, LaTeXError
+from pydflatex.typesetter import LaTeXError
+from pydflatex.latex_logger import LaTeXLoggerColour
 
 import termstyle
 termstyle.enable()
