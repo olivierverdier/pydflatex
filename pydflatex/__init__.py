@@ -1,1 +1,1 @@
-from typesetter import Typesetter, IsolatedTypesetter
+from typesetter import Runner, IsolatedTypesetter

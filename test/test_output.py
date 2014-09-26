@@ -24,8 +24,8 @@ import re
 
 
 
-from pydflatex import Typesetter, IsolatedTypesetter
-from pydflatex.typesetter import LaTeXError
+from pydflatex import IsolatedTypesetter
+from pydflatex.typesetter import Runner, LaTeXError, LogProcessor
 from pydflatex.latex_logger import LaTeXLoggerColour
 
 import termstyle
@@ -39,7 +39,7 @@ class Harness(unittest.TestCase):
 		import logging
 		self.logfile = tempfile.NamedTemporaryFile()
 		self.handler = logging.FileHandler(self.logfile.name)
-		self.t.setup_logger([self.handler])
+		self.t.logger = self.t.setup_logger([self.handler])
 
 	def typeset(self, file_name, with_binary=False, ):
 		tex_path = os.path.join(test_dir, 'latex', file_name)
@@ -70,21 +70,24 @@ class Harness(unittest.TestCase):
 		self.assert_contains('completed')
 		self.assert_contains(colours['success'])
 
-class Test_LogParse(Harness):
+class TestLogParse(Harness):
 	def setUp(self):
-		self.t = Typesetter()
-		self.t.typesetting = False
+		self.t = LogProcessor(options={'colour':True, 'debug':False})
 		self.setup_logger()
 
-	def test_error(self):
+	def process_log(self, name):
+		path = os.path.join(test_dir, 'latex', name)
 		try:
-			self.typeset('error')
-		except LaTeXError:
-			pass
+			self.t.process_log(path + os.path.extsep + 'log')
+		finally:
+			self.output = self.logfile.read()
+
+	def test_error(self):
+		self.process_log('error')
 		self.assert_contains(r'%sUndefined control sequence \nonexistingmacro.' % colours['error'])
 
 	def test_ref(self):
-		self.typeset('ref')
+		self.process_log('ref')
 		self.assert_contains("undefined")
 		self.assert_contains("nonexistent")
 		self.assert_contains('There were undefined references.', -1)
@@ -92,63 +95,66 @@ class Test_LogParse(Harness):
 		self.assert_contains(colours['error'], -2)
 
 	def test_box(self):
-		self.t.suppress_box_warning = False
-		self.typeset('box')
+		self.t.options['suppress_box_warning'] = False
+		self.process_log('box')
 		self.assert_contains('Overfull')
 		self.assert_contains(colours['box'])
 		self.assert_contains('p.1')
 
 	def test_twice_label(self):
-		self.typeset('twicelabel')
+		self.process_log('twicelabel')
 		self.assert_contains(colours['warning'], 0)
 		self.assert_contains("Label `label' multiply defined", 0)
 		self.assert_contains("There were multiply-defined labels", 1)
 		self.assert_contains(colours['error'], 1)
 
 	def test_cite(self):
-		self.typeset('cite')
+		self.process_log('cite')
 		self.assert_contains('citation')
 		self.assert_contains(colours['error'])
 ## 	def test_no_tmp_dif(self):
 ## 		self.t.typeset_file('simple')
 
 	def test_nobox(self):
-		self.typeset('box')
+		self.process_log('box')
 		self.assertEqual(self.output.find('Overfull'), -1)
 
 	def test_unicode_missing(self):
 		self.t.xetex = True
 		self.setup_logger()
-		self.typeset('unicode')
+		self.process_log('unicode')
 		print self.output
 
 
 	def test_colours(self):
-		self.typeset('cite')
+		self.process_log('cite')
 		self.assert_contains('citation', line=0, regexp=False)
 		self.assert_contains(colours['error'], line=0)
 
 	def test_nostyle(self):
-		self.t.colour = False
+		self.t.options['colour'] = False
 		self.setup_logger()
-		self.typeset('cite')
+		self.process_log('cite')
 		self.assert_contains('[citation]', line=0, regexp=False)
+
+	def test_encoding(self):
+		self.setup_logger()
+		self.process_log('encoding')
+
+class NoTestRunner(Harness):
 
 	def test_wrong_ext(self):
 		with self.assertRaises(LaTeXError):
-			self.typeset('simple.xxx')
+			self.process_log('simple.xxx')
 		## self.assert_contains('Wrong extension for %s/latex/simple.xxx' % test_dir)
 
 	def test_non_exist(self):
 		with self.assertRaises(LaTeXError) as context:
-			self.typeset('nonexistent')
+			self.process_log('nonexistent')
 		self.assertRegexpMatches(context.exception.message, 'nonexistent.tex not found', )
 
-	def test_encoding(self):
-		self.setup_logger()
-		self.typeset('encoding')
-
-class Test_IsolatedOutput(Harness):
+## class Test_IsolatedOutput(Harness):
+class Nothing(object):
 	"""
 	Test involving LaTeX running.
 	"""

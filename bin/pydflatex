@@ -7,7 +7,7 @@ A wrapper around pdflatex to allow:
 	and returning feedback by parsing the log file.
 """
 
-from pydflatex import Typesetter
+from pydflatex.typesetter import Runner, Typesetter, LogProcessor, Cleaner, Processor
 
 
 ######################################################################
@@ -20,29 +20,29 @@ description = '''Compile a tex file with pdflatex and make the auxiliary files i
 Note that the '.tex' extension may be omitted'''
 parser = ArgumentParser(usage=usage, description=description)
 
-def add_option(parser, *args, **kwargs):
-	kwargs['default'] = getattr(Typesetter, kwargs['dest'])
+def add_option(parser, cls, *args, **kwargs):
+	kwargs['default'] = cls.defaults[kwargs['dest']]
 	parser.add_argument(*args, **kwargs)
 
-add_option(parser, '-o', '--open', dest='open_after', help='view the pdf file(s) in a pdf viewer.', action='store_true')
+add_option(parser, Runner, '-o', '--open', dest='open_after', help='view the pdf file(s) in a pdf viewer.', action='store_true')
 
-add_option(parser, '-k', '--continue', help='continue on error', dest='halt_on_errors', action='store_false')
+add_option(parser, Typesetter, '-k', '--continue', help='continue on error', dest='halt_on_errors', action='store_false')
 
 #parser.add_option('-r', '--rename', help='rename the output pdf file', dest='name', action='store', default=None)
 
-add_option(parser, '-c', '--clean-up', help='clean up auxiliary files', dest='clean_up', action='store_true')
+## add_option(parser, Cleaner, '-c', '--clean-up', help='clean up auxiliary files', dest='clean_up', action='store_true')
 
-add_option(parser, '-w', '--with-warning', help='do not suppress common warnings', dest='suppress_box_warning', action='store_false')
+add_option(parser, LogProcessor, '-w', '--with-warning', help='do not suppress common warnings', dest='suppress_box_warning', action='store_false')
 
-add_option(parser, '-v', '--verbose', dest='debug', help='Verbose output for debugging', action='store_true')
+add_option(parser, Processor, '-v', '--verbose', dest='debug', help='Verbose output for debugging', action='store_true')
 
-add_option(parser, '-p', '--plain', dest='colour', help='No coloured output', action='store_false')
+add_option(parser, Processor, '-p', '--plain', dest='colour', help='No coloured output', action='store_false')
 
-add_option(parser, '-x', '--xetex', dest='xetex', help='Use XeLaTeX engine', action='store_true')
+add_option(parser, Typesetter, '-x', '--xetex', dest='xetex', help='Use XeLaTeX engine', action='store_true')
 
-add_option(parser, '-l', '--log-parsing', dest='typesetting', help='Only parse log', action='store_false')
+add_option(parser, Runner, '-l', '--log-parsing', dest='typesetting', help='Only parse log', action='store_false')
 
-add_option(parser, '-t', '--typesetting', dest='log_parsing', help='Only typeset', action='store_false')
+add_option(parser, Runner, '-t', '--typesetting', dest='log_parsing', help='Only typeset', action='store_false')
 
 
 parser.add_argument('tex_path', type=str, metavar='tex path', help='path to tex file')
@@ -50,11 +50,11 @@ parser.add_argument('tex_path', type=str, metavar='tex path', help='path to tex 
 args = parser.parse_args()
 
 
-typesetter = Typesetter(**args.__dict__)
+runner = Runner(options=args.__dict__)
 try:
-	typesetter.run()
+	runner.run(args.tex_path)
 except Exception, e:
 	import sys
-	typesetter.logger.error('%s: %s' % (type(e).__name__, e))
+	runner.logger.error('%s: %s' % (type(e).__name__, e))
 	sys.exit(1)
 

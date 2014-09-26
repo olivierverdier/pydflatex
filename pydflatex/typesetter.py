@@ -18,7 +18,7 @@ import subprocess
 # loading the log parser
 from pydflatex.latexlogparser import LogCheck
 
-import latex_logger as logger
+import latex_logger
 
 
 class LaTeXError(Exception):
@@ -26,34 +26,55 @@ class LaTeXError(Exception):
 	LaTeX Error
 	"""
 
-class Typesetter(object):
-	def __init__(self, tex_path=None, **options):
-		self.tex_path = tex_path
+class Processor(object):
+	"""
+	Models an object with a logger and some options.
+	General options:
+		- colour
+		- debug
+	"""
+
+	def __init__(self, logger=None, options=None):
 		# storing the options
-		for k, v in options.items():
-			setattr(self, k, v)
+		self.options = self.defaults.copy()
+		if options is not None:
+			self.options.update(options)
 		# setting up the logger
-		self.setup_logger()
+		if logger is not None:
+			self.logger = logger
+		else:
+			self.logger = self.setup_logger()
 		self.logger.debug(options)
 
-	colour = True
-	debug = False
+	defaults={
+			'colour': True,
+			'debug': False,
+			}
 
 	def setup_logger(self, handlers=None):
-		if self.colour:
-			LoggerClass = logger.LaTeXLoggerColour
+		if self.options['colour']:
+			LoggerClass = latex_logger.LaTeXLoggerColour
 		else:
-			LoggerClass = logger.LaTeXLogger
-		self.logger = LoggerClass('pydflatex')
+			LoggerClass = latex_logger.LaTeXLogger
+		logger = LoggerClass('pydflatex')
 		if not handlers:
-			if not self.debug:
-				self.logger.addHandler(logger.std_handler)
+			if not self.options['debug']:
+				logger.addHandler(latex_logger.std_handler)
 			else:
-				self.logger.addHandler(logger.debug_handler)
+				logger.addHandler(latex_logger.debug_handler)
 		else:
 			for handler in handlers:
-				self.logger.addHandler(handler)
+				logger.addHandler(handler)
+		return logger
 
+
+class Runner(Processor):
+
+	defaults = {
+		'typesetting': True,
+		'log_parsing': True,
+		'open_after': False,
+	}
 
 	@classmethod
 	def paths(self, tex_path):
@@ -84,16 +105,12 @@ class Typesetter(object):
 			raise LaTeXError('File {0} not found'.format(full_path))
 		return {'base':base, 'file_base':file_base, 'root':root, 'full_path':full_path}
 
-
 	def prepare(self, tex_path=None):
 		if tex_path is None:
 			tex_path = self.tex_path
 		paths = self.paths(tex_path)
 		return tex_path, paths
 
-	typesetting = True
-	log_parsing = True
-	open_after = False
 
 	def run(self, tex_path=None):
 		"""
@@ -103,35 +120,49 @@ class Typesetter(object):
 
 		full_path = paths['full_path']
 
-		if self.typesetting:
+		if self.options['typesetting']:
 			# Typeset
 			time_start = time.time()
-			self.typeset(full_path)
+			typesetter = Typesetter(logger=self.logger, options=self.options)
+			typesetter.typeset(full_path)
 			time_end = time.time()
 			success_message = 'Typesetting of "{name}" completed in {time:.1f}s.'.format(name=full_path, time=(time_end - time_start))
 
 
-		if self.log_parsing:
+		if self.options['log_parsing']:
 			# Parse log
-			log_file_path = self.log_file_path(paths['base'], paths['file_base'])
-			self.process_log(log_file_path)
+			log_processor = LogProcessor(logger=self.logger, options=self.options)
+			log_file_path = log_processor.log_file_path(paths['base'], paths['file_base'])
+			error = log_processor.process_log(log_file_path)
+			if error and self.options['halt_on_errors']:
+				raise LaTeXError(error.get('text'))
 
-		if self.typesetting:
+		if self.options['typesetting']:
 			# Print success message
 			self.logger.success(success_message)
 
 			# Post process
-			self.handle_aux(paths['base'], paths['file_base'])
-			if self.open_after:
-				self.open_pdf(paths['root'])
+			cleaner = Cleaner(logger=self.logger, options=self.options)
+			cleaner.handle_aux(paths['base'], paths['file_base'])
+			if self.options['open_after']:
+				opener = OpenPdf(logger=self.logger, options=self.options)
+				opener.open_pdf(paths['root'])
 
-	# Typesetting
+class Typesetter(Processor):
+	"""
+	Typeset a TeX file.
+	Options:
+		- halt_on_errors
+		- xetex
+	"""
 
-	halt_on_errors = True
-	xetex = False
+	defaults = {
+			'halt_on_errors': True,
+			'xetex': False,
+			}
 
 	def engine(self):
-		return ['pdflatex','xelatex'][self.xetex]
+		return ['pdflatex','xelatex'][self.options['xetex']]
 
 	def arguments(self):
 		"""
@@ -143,7 +174,7 @@ class Typesetter(object):
 				'-interaction=batchmode',
 				'-recorder',
 				]
-		if self.halt_on_errors:
+		if self.options['halt_on_errors']:
 			args.insert(-1, '-halt-on-error')
 		return args
 
@@ -161,9 +192,17 @@ class Typesetter(object):
 		output = subprocess.Popen(arguments, stdout=subprocess.PIPE).communicate()[0]
 		self.logger.message(output.splitlines()[0])
 
-	# Log parsing
+class LogProcessor(Processor):
+	"""
+	Process a log file.
+	Options:
+		- suppress_box_warning
+	"""
 
-	suppress_box_warning = True
+	defaults = Processor.defaults.copy()
+	defaults.update({
+		'suppress_box_warning': True,
+	})
 
 	@classmethod
 	def log_file_path(self, base, file_base):
@@ -186,8 +225,7 @@ class Typesetter(object):
 
 		# Process info from parser
 		error = self.process_parser(parser)
-		if error and self.halt_on_errors:
-			raise LaTeXError(error.get('text'))
+		return error
 
 	def process_parser(self, parser):
 		"""
@@ -197,7 +235,7 @@ class Typesetter(object):
 			has_occ = box['text'].find(r' has occurred while \output is active')
 			if has_occ != -1:
 				box['text'] = box['text'][:has_occ]
-			if not self.suppress_box_warning:
+			if not self.options['suppress_box_warning']:
 				self.logger.box_warning(box)
 		for ref in parser.get_references():
 			self.logger.ref_warning(ref)
@@ -214,7 +252,11 @@ class Typesetter(object):
 				self.logger.latex_error(error)
 			return errors[0]
 
-	# Post processing
+class Cleaner(Processor):
+	"""
+	Identify all the output files and make them invisible.
+	"""
+	defaults={}
 
 	@classmethod
 	def fls_file(self, file_base):
@@ -243,6 +285,7 @@ class Typesetter(object):
 			if os.path.splitext(aux_file)[1] != '.pdf':
 				self.make_invisible(base, aux_file)
 
+class OpenPdf(Processor):
 	def open_pdf(self, root):
 		"""
 		Open the generated pdf file.
@@ -265,7 +308,7 @@ def make_invisible_darwin(self, base, aux_file):
 
 import platform
 if platform.system() == 'Darwin':
-	Typesetter.make_invisible = make_invisible_darwin
+	Cleaner.make_invisible = make_invisible_darwin
 
 class IsolatedTypesetter(Typesetter):
 
