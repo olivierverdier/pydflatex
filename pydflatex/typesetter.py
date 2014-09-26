@@ -31,10 +31,13 @@ class Typesetter(object):
 		self.tex_path = tex_path
 		# storing the options
 		for k, v in options.items():
-			self.__setattr__(k, v)
+			setattr(self, k, v)
 		# setting up the logger
 		self.setup_logger()
 		self.logger.debug(options)
+
+	colour = True
+	debug = False
 
 	def setup_logger(self, handlers=None):
 		if self.colour:
@@ -51,33 +54,6 @@ class Typesetter(object):
 			for handler in handlers:
 				self.logger.addHandler(handler)
 
-
-	typesetting = True
-
-	log_parsing = True
-
-	open_after = False
-
-	clean_up = False
-
-	debug = False
-
-	colour = True
-
-	# whereas the pdf file produced will be pulled back in the current directory
-	move_pdf_to_curdir = True
-
-	new_pdf_name = ''
-
-	# extensions of the files that will be "pulled back" to the directory where the file is
-	# on Mac OS X those files will be set invisible
-	move_exts = ['pdfsync', 'aux', 'idx', 'pdf']
-
-	def prepare(self, tex_path=None):
-		if tex_path is None:
-			tex_path = self.tex_path
-		paths = self.paths(tex_path)
-		return tex_path, paths
 
 	@classmethod
 	def paths(self, tex_path):
@@ -107,6 +83,17 @@ class Typesetter(object):
 		if not os.path.exists(full_path):
 			raise LaTeXError('File {0} not found'.format(full_path))
 		return {'base':base, 'file_base':file_base, 'root':root, 'full_path':full_path}
+
+
+	def prepare(self, tex_path=None):
+		if tex_path is None:
+			tex_path = self.tex_path
+		paths = self.paths(tex_path)
+		return tex_path, paths
+
+	typesetting = True
+	log_parsing = True
+	open_after = False
 
 	def run(self, tex_path=None):
 		"""
@@ -314,6 +301,8 @@ class IsolatedTypesetter(Typesetter):
 		self.rm_tmp_dir()
 		self.create_tmp_dir()
 
+	clean_up = False
+
 	def run(self, tex_path=None):
 		# clean up first if needed
 		if self.clean_up:
@@ -322,6 +311,14 @@ class IsolatedTypesetter(Typesetter):
 
 	def log_file_path(self, base, file_base):
 		return os.path.join(self.tmp_dir, file_base + os.path.extsep + 'log')
+
+	# extensions of the files that will be "pulled back" to the directory where the file is
+	# on Mac OS X those files will be set invisible
+	move_exts = ['pdfsync', 'aux', 'idx', 'pdf']
+
+	# whereas the pdf file produced will be pulled back in the current directory
+	move_pdf_to_curdir = True
+	new_pdf_name = ''
 
 	def handle_aux(self, base, file_base):
 		"""
