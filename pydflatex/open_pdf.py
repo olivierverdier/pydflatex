@@ -3,6 +3,7 @@
 from __future__ import division
 
 from processor import Processor
+import os
 
 class OpenPdf(Processor):
 	def open_pdf(self, root):
