@@ -1,13 +1,4 @@
 #!/usr/bin/env python
-# (c) Olivier Verdier <olivier.verdier@gmail.com>, 2007-2013
-"""
-A wrapper around pdflatex which
-- runs pdflatex blazingly fast using the -batchmode option
-- returns feedback by parsing the log file
-- hides the temporary files in various ways
-- opens the pdf file if needed
-"""
-
 
 import subprocess
 import datetime

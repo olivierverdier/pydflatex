@@ -5,8 +5,6 @@ from __future__ import division
 import os
 import time
 
-
-
 class LaTeXError(Exception):
 	"""
 	LaTeX Error
