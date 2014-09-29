@@ -5,6 +5,7 @@ import unittest
 
 import os
 test_dir = os.path.dirname(__file__)
+latex_dir = os.path.join(test_dir, 'latex')
 tmp_dir = os.path.join(test_dir, '.tmp')
 
 import tempfile
@@ -41,7 +42,7 @@ class Harness(unittest.TestCase):
 		self.t.logger = self.t.setup_logger([self.handler])
 
 	def typeset(self, file_name, with_binary=False, ):
-		tex_path = os.path.join(test_dir, 'latex', file_name)
+		tex_path = os.path.join(latex_dir, file_name)
 		if with_binary:
 			self.output = Popen([bin_path, tex_path], stderr=PIPE).communicate()[1]
 		else:
@@ -152,6 +153,11 @@ class TestRunnerPath(Harness):
 			Runner.paths('nonexistent')
 		self.assertRegexpMatches(context.exception.message, 'nonexistent.tex not found', )
 
+	def test_trailing_dot(self):
+		res = Runner.paths(os.path.join(latex_dir, 'simple.'))
+		print res
+
+
 ## from pydflatex import IsolatedTypesetter
 ## class Test_IsolatedOutput(Harness):
 class Nothing(object):
@@ -190,11 +196,6 @@ class Nothing(object):
 		self.assert_contains('Typeset', -1)
 		self.assert_contains('This is pdfTeX', regexp=True)
 		self.assert_contains(colours['success'])
-
-	def test_trailing_dot(self):
-		self.typeset('simple.')
-		self.assert_success()
-
 
 	@unittest.skip('Rerun is broken')
 	def test_rerun(self):
