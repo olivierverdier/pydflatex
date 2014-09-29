@@ -11,7 +11,6 @@ class Cleaner(Processor):
 	"""
 	Identify all the output files and make them invisible.
 	"""
-	defaults={}
 
 	@classmethod
 	def fls_file(self, file_base):

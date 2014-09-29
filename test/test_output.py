@@ -24,7 +24,7 @@ import re
 
 
 
-from pydflatex import Runner, LaTeXError, LogProcessor
+from pydflatex import Runner, Cleaner, LaTeXError, LogProcessor
 from pydflatex.latex_logger import LaTeXLoggerColour
 
 import termstyle
@@ -271,9 +271,9 @@ class Nothing(object):
 		self.typeset('simple')
 		self.assert_contains('XeTeX')
 
-class Test_Output(Harness):
+class TestOutput(Harness):
 	def setUp(self):
-		self.t = Typesetter()
+		self.t = Cleaner()
 		self.setup_logger()
 
 	@unittest.skip('IsolatedTypesetter does not make files invisible anymore')
@@ -286,8 +286,7 @@ class Test_Output(Harness):
 				## self.assertEqual(output, '1')
 
 	def test_output_files(self):
-		self.typeset('simple')
 		expected = ['./simple.fls', 'simple.log', 'simple.aux', 'simple.pdf']
-		computed = list(self.t.output_files(self.t.fls_file('simple')))
-		self.assertEqual(computed, expected)
+		computed = list(Cleaner.output_files(os.path.join(test_dir, 'simple.fls')))
+		self.assertEqual(computed[1:], expected[1:])
 

@@ -1,0 +1,14 @@
+PWD /Users/olivier/Dropbox/pydflatex/test/latex
+INPUT /usr/local/texlive/2014/texmf.cnf
+INPUT /usr/local/texlive/2014/texmf-dist/web2c/texmf.cnf
+INPUT /usr/local/texlive/2014/texmf-var/web2c/xetex/xelatex.fmt
+INPUT simple.tex
+OUTPUT simple.log
+INPUT /usr/local/texlive/2014/texmf-dist/tex/latex/base/article.cls
+INPUT /usr/local/texlive/2014/texmf-dist/tex/latex/base/article.cls
+INPUT /usr/local/texlive/2014/texmf-dist/tex/latex/base/size10.clo
+INPUT /usr/local/texlive/2014/texmf-dist/tex/latex/base/size10.clo
+INPUT simple.aux
+INPUT simple.aux
+OUTPUT simple.aux
+INPUT simple.aux
