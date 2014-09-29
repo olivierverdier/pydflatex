@@ -140,16 +140,16 @@ class TestLogParse(Harness):
 		self.setup_logger()
 		self.process_log('encoding')
 
-class NoTestRunner(Harness):
+class TestRunnerPath(Harness):
 
 	def test_wrong_ext(self):
 		with self.assertRaises(LaTeXError):
-			self.process_log('simple.xxx')
+			Runner.paths('simple.xxx')
 		## self.assert_contains('Wrong extension for %s/latex/simple.xxx' % test_dir)
 
 	def test_non_exist(self):
 		with self.assertRaises(LaTeXError) as context:
-			self.process_log('nonexistent')
+			Runner.paths('nonexistent')
 		self.assertRegexpMatches(context.exception.message, 'nonexistent.tex not found', )
 
 ## from pydflatex import IsolatedTypesetter
