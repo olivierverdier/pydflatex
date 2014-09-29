@@ -54,7 +54,7 @@ class Typesetter(Processor):
 		arguments = self.arguments()
 		# append file name
 		arguments.append(full_path)
-		self.logger.debug(arguments)
+		self.logger.debug("\n"+" ".join(arguments)+"\n")
 		output = subprocess.Popen(arguments, stdout=subprocess.PIPE).communicate()[0]
 		self.logger.message(output.splitlines()[0])
 
