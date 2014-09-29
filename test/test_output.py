@@ -24,8 +24,7 @@ import re
 
 
 
-from pydflatex import IsolatedTypesetter
-from pydflatex.typesetter import Runner, LaTeXError, LogProcessor
+from pydflatex import Runner, LaTeXError, LogProcessor
 from pydflatex.latex_logger import LaTeXLoggerColour
 
 import termstyle
@@ -153,6 +152,7 @@ class NoTestRunner(Harness):
 			self.process_log('nonexistent')
 		self.assertRegexpMatches(context.exception.message, 'nonexistent.tex not found', )
 
+## from pydflatex import IsolatedTypesetter
 ## class Test_IsolatedOutput(Harness):
 class Nothing(object):
 	"""

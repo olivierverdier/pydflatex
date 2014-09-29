@@ -7,7 +7,7 @@ A wrapper around pdflatex to allow:
 	and returning feedback by parsing the log file.
 """
 
-from pydflatex.typesetter import Runner, Typesetter, LogProcessor, Cleaner, Processor
+from pydflatex import Runner, Typesetter, LogProcessor, Cleaner, Processor
 
 
 ######################################################################
