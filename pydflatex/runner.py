@@ -59,6 +59,26 @@ class Runner(Processor):
 		paths = self.paths(tex_path)
 		return tex_path, paths
 
+	def typeset(self, full_path):
+		time_start = time.time()
+		typesetter = Typesetter(logger=self.logger, options=self.options)
+		typesetter.typeset(full_path)
+		time_end = time.time()
+		return time_end - time_start
+
+	def process_log(self, base, file_base):
+		log_processor = LogProcessor(logger=self.logger, options=self.options)
+		log_file_path = log_processor.log_file_path(base, file_base)
+		error = log_processor.process_log(log_file_path)
+		return error
+
+	def clean(self, base, file_base):
+		cleaner = Cleaner(logger=self.logger, options=self.options)
+		cleaner.handle_aux(base, file_base)
+
+	def open_pdf(self, root):
+		opener = OpenPdf(logger=self.logger, options=self.options)
+		opener.open_pdf(root)
 
 	def run(self, tex_path=None):
 		"""
@@ -69,30 +89,21 @@ class Runner(Processor):
 		full_path = paths['full_path']
 
 		if self.options['typesetting']:
-			# Typeset
-			time_start = time.time()
-			typesetter = Typesetter(logger=self.logger, options=self.options)
-			typesetter.typeset(full_path)
-			time_end = time.time()
-			success_message = 'Typesetting of "{name}" completed in {time:.1f}s.'.format(name=full_path, time=(time_end - time_start))
-
+			time_diff = self.typeset(full_path)
+			success_message = 'Typesetting of "{name}" completed in {time:.1f}s.'.format(name=full_path, time=(time_diff))
 
 		if self.options['log_parsing']:
 			# Parse log
-			log_processor = LogProcessor(logger=self.logger, options=self.options)
-			log_file_path = log_processor.log_file_path(paths['base'], paths['file_base'])
-			error = log_processor.process_log(log_file_path)
+			error = self.process_log(paths['base'], paths['file_base'])
 			if error and self.options['halt_on_errors']:
 				raise LaTeXError(error.get('text'))
 
 		if self.options['typesetting']:
 			# Print success message
 			self.logger.success(success_message)
-
 			# Post process
-			cleaner = Cleaner(logger=self.logger, options=self.options)
-			cleaner.handle_aux(paths['base'], paths['file_base'])
+			self.clean(paths['base'], paths['file_base'])
+			# Open pdf
 			if self.options['open_after']:
-				opener = OpenPdf(logger=self.logger, options=self.options)
-				opener.open_pdf(paths['root'])
+				self.open_pdf(paths['root'])
 
