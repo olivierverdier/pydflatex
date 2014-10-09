@@ -25,7 +25,7 @@ import re
 
 
 
-from pydflatex import Runner, Cleaner, LaTeXError, LogProcessor
+from pydflatex import Runner, Cleaner, LaTeXError, LogProcessor, Typesetter
 from pydflatex.latex_logger import LaTeXLoggerColour
 
 import termstyle
@@ -291,3 +291,7 @@ class TestOutput(Harness):
 		computed = list(Cleaner.output_files(os.path.join(test_dir, 'simple.fls')))
 		self.assertEqual(computed[1:], expected[1:])
 
+class TestModules(unittest.TestCase):
+	def test_typesetter(self):
+		t = Typesetter(options={'xetex':True})
+		t.typeset('blah.tex')

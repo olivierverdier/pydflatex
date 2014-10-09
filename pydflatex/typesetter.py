@@ -13,10 +13,11 @@ class Typesetter(Processor):
 		- xetex
 	"""
 
-	defaults = {
+	defaults = Processor.defaults.copy()
+	defaults.update({
 			'halt_on_errors': True,
 			'xetex': False,
-			}
+			})
 
 	def engine(self):
 		return ['pdflatex','xelatex'][self.options['xetex']]
