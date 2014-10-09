@@ -5,12 +5,7 @@ from __future__ import division
 import os
 import time
 
-class LaTeXError(Exception):
-	"""
-	LaTeX Error
-	"""
-
-from processor import Processor
+from processor import Processor, LaTeXError
 from typesetter import Typesetter
 from open_pdf import OpenPdf
 from log_processor import LogProcessor
@@ -48,9 +43,6 @@ class Runner(Processor):
 				full_path = tex_path
 		else:
 			full_path = root + os.path.extsep + 'tex'
-		# make sure that the file exists
-		if not os.path.exists(full_path):
-			raise LaTeXError('File {0} not found'.format(full_path))
 		return {'base':base, 'file_base':file_base, 'root':root, 'full_path':full_path}
 
 	def prepare(self, tex_path=None):

@@ -148,10 +148,6 @@ class TestRunnerPath(Harness):
 			Runner.paths('simple.xxx')
 		## self.assert_contains('Wrong extension for %s/latex/simple.xxx' % test_dir)
 
-	def test_non_exist(self):
-		with self.assertRaises(LaTeXError) as context:
-			Runner.paths('nonexistent')
-		self.assertRegexpMatches(context.exception.message, 'nonexistent.tex not found', )
 
 	def test_trailing_dot(self):
 		res = Runner.paths(os.path.join(latex_dir, 'simple.'))
@@ -294,4 +290,5 @@ class TestOutput(Harness):
 class TestModules(unittest.TestCase):
 	def test_typesetter(self):
 		t = Typesetter(options={'xetex':True})
-		t.typeset('blah.tex')
+		with self.assertRaises(LaTeXError) as context:
+			t.typeset('nonexistent.tex')

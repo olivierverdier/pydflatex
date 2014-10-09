@@ -2,8 +2,9 @@
 
 import subprocess
 import datetime
+import os
 
-from processor import Processor
+from processor import Processor, LaTeXError
 
 class Typesetter(Processor):
 	"""
@@ -40,6 +41,9 @@ class Typesetter(Processor):
 		"""
 		Typeset one given file.
 		"""
+		# make sure that the file exists
+		if not os.path.exists(full_path):
+			raise LaTeXError('File {0} not found'.format(full_path))
 		# run pdflatex
 		now = datetime.datetime.now().strftime('%Y-%m-%d %H.%M.%S')
 		self.logger.message("\t[{now}] {engine} {file}".format(engine=self.engine(), file=full_path, now=now))

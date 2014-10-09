@@ -5,6 +5,11 @@ from __future__ import division
 
 import latex_logger
 
+class LaTeXError(Exception):
+	"""
+	LaTeX Error
+	"""
+
 class Processor(object):
 	"""
 	Models an object with a logger and some options.
