@@ -150,9 +150,20 @@ class TestRunnerPath(Harness):
 
 
 	def test_trailing_dot(self):
-		res = Runner.paths(os.path.join(latex_dir, 'simple.'))
-		print res
+		computed = Runner.paths('simple.')
+		expected = {'full_path':'simple.tex',
+				'file_base':'simple',
+				'base':'',
+				'root':'simple',}
+		self.assertEqual(computed, expected)
 
+	def test_path(self):
+		computed = Runner.paths('path/file.tex')
+		expected = {'full_path':'path/file.tex',
+				'file_base':'file',
+				'base':'path',
+				'root':'path/file',}
+		self.assertEqual(computed, expected)
 
 ## from pydflatex import IsolatedTypesetter
 ## class Test_IsolatedOutput(Harness):
