@@ -23,7 +23,7 @@ class Processor(object):
 			self.logger = logger
 		else:
 			self.logger = self.setup_logger()
-		self.logger.debug("%s\ninitialiazed with\n%s\n" % (type(self), options))
+		self.logger.debug("%s\ninitialized with\n%s\n" % (type(self), options))
 
 	defaults={
 			'colour': True,
