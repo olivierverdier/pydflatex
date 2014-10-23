@@ -78,7 +78,7 @@ class TestLogParse(Harness):
 	def process_log(self, name):
 		path = os.path.join(test_dir, 'latex', name)
 		try:
-			self.t.process_log(path + os.path.extsep + 'log')
+			self.t.process_log(path + os.path.extsep + 'testlog')
 		finally:
 			self.output = self.logfile.read()
 
