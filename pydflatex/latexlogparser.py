@@ -176,7 +176,7 @@ class LogCheck (object):
 						m = re_ignored.search(error)
 						if m:
 							d["file"] = last_file
-							if d.has_key("code"):
+							if "code" in d:
 								del d["code"]
 							d.update( m.groupdict() )
 						elif pos[-1] is None:
