@@ -59,7 +59,7 @@ class Harness(unittest.TestCase):
 		else:
 			out = all_out.splitlines()[line]
 		if not regexp:
-			does_match = out.find(match) != -1
+			does_match = match in out
 		else:
 			does_match = re.search(match, self.output, re.MULTILINE)
 		if not does_match:
@@ -117,7 +117,7 @@ class TestLogParse(Harness):
 
 	def test_nobox(self):
 		self.process_log('box')
-		self.assertEqual(self.output.find('Overfull'), -1)
+		self.assertNotIn('Overfull', self.output)
 
 	def test_unicode_missing(self):
 		self.t.xetex = True

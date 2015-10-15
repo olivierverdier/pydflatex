@@ -77,7 +77,7 @@ class LogCheck (object):
 				# sometimes issues warnings (like undefined references) in the
 				# form of errors...
 
-				if string.find(line, "pdfTeX warning") == -1:
+				if "pdfTeX warning" in line:
 					return True
 		return False
 
@@ -159,7 +159,7 @@ class LogCheck (object):
 				if m:
 					parsing = False
 					skipping = True
-					pdfTeX = string.find(line, "pdfTeX warning") != -1
+					pdfTeX = "pdfTeX warning" in line
 					if (pdfTeX and warnings) or (errors and not pdfTeX):
 						if pdfTeX:
 							d = {
@@ -287,7 +287,7 @@ class LogCheck (object):
 
 			# Other warnings
 
-			if line.find("Warning") != -1:
+			if "Warning" in line:
 				m = re_warning.match(line)
 				if m:
 					info = m.groupdict()
