@@ -123,7 +123,7 @@ class TestLogParse(Harness):
 		self.t.xetex = True
 		self.setup_logger()
 		self.process_log('unicode')
-		print self.output
+		print(self.output)
 
 
 	def test_colours(self):
@@ -269,8 +269,8 @@ class Nothing(object):
 		self.t.halt_on_errors = False
 		self.t.move_pdf_to_curdir = False
 		self.typeset('continue')
-		print os.path.exists('./.latex_tmp/continue.pdf')
-		print os.path.exists('./latex/continue.pdf')
+		print(os.path.exists('./.latex_tmp/continue.pdf'))
+		print(os.path.exists('./latex/continue.pdf'))
 		self.assertTrue(self.exists('continue.pdf'))
 
 	def test_xetex(self):
@@ -290,7 +290,7 @@ class TestOutput(Harness):
 		for aux in self.t.output_files(self.t.fls_file('simple')):
 			output = Popen(['GetFileInfo', '-av', aux], stdout=PIPE).communicate()[0].rstrip()
 			if os.path.splitext(aux)[-1] != '.pdf':
-				print aux, output
+				print(aux, output)
 				## self.assertEqual(output, '1')
 
 	def test_output_files(self):
