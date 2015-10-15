@@ -80,7 +80,7 @@ class TestLogParse(Harness):
 		try:
 			self.t.process_log(path + os.path.extsep + 'testlog')
 		finally:
-			self.output = self.logfile.read()
+			self.output = self.logfile.read().decode('utf8')
 
 	def test_error(self):
 		self.process_log('error')
