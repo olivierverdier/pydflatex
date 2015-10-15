@@ -4,7 +4,7 @@ from __future__ import division
 
 import os
 
-from processor import Processor
+from .processor import Processor
 
 # loading the log parser
 from pydflatex.latexlogparser import LogCheck

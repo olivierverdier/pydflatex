@@ -3,7 +3,7 @@
 from __future__ import division
 
 
-import latex_logger
+from . import latex_logger
 
 class LaTeXError(Exception):
 	"""

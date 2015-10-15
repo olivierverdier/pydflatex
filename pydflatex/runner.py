@@ -5,11 +5,11 @@ from __future__ import division
 import os
 import time
 
-from processor import Processor, LaTeXError
-from typesetter import Typesetter
-from open_pdf import OpenPdf
-from log_processor import LogProcessor
-from cleaner import Cleaner
+from .processor import Processor, LaTeXError
+from .typesetter import Typesetter
+from .open_pdf import OpenPdf
+from .log_processor import LogProcessor
+from .cleaner import Cleaner
 
 class Runner(Processor):
 

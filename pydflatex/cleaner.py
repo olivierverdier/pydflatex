@@ -5,7 +5,7 @@ from __future__ import division
 import os
 import subprocess
 
-from processor import Processor
+from .processor import Processor
 
 class Cleaner(Processor):
 	"""

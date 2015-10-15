@@ -53,7 +53,7 @@ args = parser.parse_args()
 runner = Runner(options=args.__dict__)
 try:
 	runner.run(args.tex_path)
-except Exception, e:
+except Exception as e:
 	import sys
 	runner.logger.error('%s: %s' % (type(e).__name__, e))
 	sys.exit(1)

@@ -4,7 +4,7 @@ import subprocess
 import datetime
 import os
 
-from processor import Processor, LaTeXError
+from .processor import Processor, LaTeXError
 
 class Typesetter(Processor):
 	"""

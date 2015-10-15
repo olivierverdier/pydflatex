@@ -2,7 +2,7 @@
 # coding: UTF-8
 from __future__ import division
 
-from processor import Processor
+from .processor import Processor
 import os
 
 class OpenPdf(Processor):
