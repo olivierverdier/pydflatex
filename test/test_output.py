@@ -41,9 +41,9 @@ class Harness(unittest.TestCase):
 		self.handler = logging.FileHandler(self.logfile.name)
 		self.t.logger = self.t.setup_logger([self.handler])
 
-	def typeset(self, file_name, with_binary=False, ):
+	def typeset(self, file_name, with_executable=False, ):
 		tex_path = os.path.join(latex_dir, file_name)
-		if with_binary:
+		if with_executable:
 			self.output = Popen([bin_path, tex_path], stderr=PIPE).communicate()[1]
 		else:
 			try:
@@ -216,8 +216,8 @@ class Nothing(object):
 		self.assert_contains('\n%sLabel' % colours['warning'])
 		self.assert_success()
 
-	def test_binary(self):
-		self.typeset('simple', with_binary=True)
+	def test_executable(self):
+		self.typeset('simple', with_executable=True)
 		self.assert_contains('pdflatex %s/latex/simple.tex' % test_dir, 0)
 
 	def test_pdfsync(self):
