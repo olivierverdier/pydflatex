@@ -52,6 +52,6 @@ class Typesetter(Processor):
 		arguments.append(full_path)
 		self.logger.debug("\n"+" ".join(arguments)+"\n")
 		output = subprocess.Popen(arguments, stdout=subprocess.PIPE).communicate()[0]
-		self.logger.message(output.splitlines()[0])
+		self.logger.message(output.splitlines()[0].decode('utf8'))
 
 

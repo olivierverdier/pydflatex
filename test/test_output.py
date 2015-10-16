@@ -28,8 +28,6 @@ import re
 from pydflatex import Runner, Cleaner, LaTeXError, LogProcessor, Typesetter
 from pydflatex.latex_logger import LaTeXLoggerColour
 
-import termstyle
-termstyle.enable()
 colours = dict([(style, LaTeXLoggerColour.styled('', style)[:-8]) for style in LaTeXLoggerColour.colours])
 
 class Harness(unittest.TestCase):
@@ -84,7 +82,8 @@ class TestLogParse(Harness):
 
 	def test_error(self):
 		self.process_log('error')
-		self.assert_contains(r'%sUndefined control sequence \nonexistingmacro.' % colours['error'])
+		self.assert_contains(colours['error'])
+		self.assert_contains(r'Undefined control sequence \nonexistingmacro.')
 
 	def test_ref(self):
 		self.process_log('ref')

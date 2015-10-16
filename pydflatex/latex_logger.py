@@ -111,16 +111,18 @@ class LaTeXLoggerColour(LaTeXLogger):
 	def styled(self, msg, style):
 		style_specs = self.colours[style]
 		color = style_specs.get('color')
-		styled = msg
+		styled = ''
 		if color:
-			styled = getattr(termstyle, style_specs['color'])(styled)
+			styled += getattr(terminal, style_specs['color'])
 		for attr in style_specs.get('attrs', []):
-			styled = getattr(termstyle, attr)(styled)
+			styled += getattr(terminal, attr)
+		styled += msg
+		styled += terminal.normal
 		return styled
 
 try:
-	import termstyle
-	termstyle.auto()
+	import blessings
+	terminal = blessings.Terminal()
 except ImportError:
 	import warnings
 	warnings.warn('termstyle was not found: in black and white it will be')
