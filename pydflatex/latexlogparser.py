@@ -3,7 +3,6 @@
 # Modified by Olivier Verdier <olivier.verdier@gmail.com>
 
 import re
-import string
 
 import codecs
 
@@ -221,7 +220,7 @@ class LogCheck (object):
 
 			if prefix is not None:
 				if line[:len(prefix)] == prefix:
-					text.append(string.strip(line[len(prefix):]))
+					text.append(line[len(prefix):].strip())
 				else:
 					text = " ".join(text)
 					m = re_online.search(text)
