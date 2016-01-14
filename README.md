@@ -52,5 +52,4 @@ Feel free to check out the other modules inside the `pydflatex` folder.
 
 ## Requirements
 
-- Python v.2.6 (because of the new string formatting)
-- ``termstyle`` (optional but strongly advised): to display results in colour
+- [`blessings`](https://github.com/erikrose/blessings) (optional but strongly advised): to display results in colour
