@@ -26,6 +26,14 @@ Some useful options:
 
 A full list of options is available by running `pydflatex --help`.
 
+## Install
+
+You can install pydflatex by running
+
+```sh
+pip install -e "git+https://github.com/olivierverdier/pydflatex#egg=pydflatex"
+pip install blessings
+```
 
 
 ## Using as a Library
